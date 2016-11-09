@@ -32,11 +32,12 @@ namespace NadekoBot.Modules.Searches
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task Weather(IUserMessage umsg, string city, string country)
+        public async Task Weather(IUserMessage umsg, [Remainder] string location)
         {
             var channel = (ITextChannel)umsg.Channel;
-            city = city.Replace(" ", "");
-            country = city.Replace(" ", "");
+			string[] loc = location.Split(',');
+            string city = loc[0].Replace(" ", "_");
+            string country = loc[1].Replace(" ", "_");
             string response;
             using (var http = new HttpClient())
                 response = await http.GetStringAsync($"http://api.ninetales.us/nadekobot/weather/?city={city}&country={country}").ConfigureAwait(false);

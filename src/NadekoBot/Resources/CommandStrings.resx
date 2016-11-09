@@ -1867,10 +1867,10 @@
     <value>weather we</value>
   </data>
   <data name="weather_desc" xml:space="preserve">
-    <value>Shows weather data for a specified city and a country. BOTH ARE REQUIRED. Use country abbrevations.</value>
+    <value>Shows weather data for a specified city and a country. BOTH ARE REQUIRED, SEPERATED BY COMMA. Use country abbrevations.</value>
   </data>
   <data name="weather_usage" xml:space="preserve">
-    <value>`{0}we Moscow RF`</value>
+    <value>`{0}we Moscow\ RF`</value>
   </data>
   <data name="youtube_cmd" xml:space="preserve">
     <value>youtube yt</value>
