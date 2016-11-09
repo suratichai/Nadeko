@@ -34,6 +34,18 @@ namespace NadekoBot.Modules.Games.Trivia
         public bool ShouldStopGame { get; private set; }
 
         public int WinRequirement { get; } = 10;
+        
+        public Gambling(ILocalization loc, CommandService cmds, ShardedDiscordClient client) : base(loc, cmds, client)
+        {
+            using (var uow = DbHandler.UnitOfWork())
+            {
+                var conf = uow.BotConfig.GetOrCreate();
+
+                CurrencyName = conf.CurrencyName;
+                CurrencySign = conf.CurrencySign;
+                CurrencyPluralName = conf.CurrencyPluralName;
+            }
+        }
 
         public TriviaGame(IGuild guild, ITextChannel channel, bool showHints, int winReq = 10)
         {
