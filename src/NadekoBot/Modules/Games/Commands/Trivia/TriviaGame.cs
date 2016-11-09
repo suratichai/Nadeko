@@ -152,6 +152,7 @@ namespace NadekoBot.Modules.Games.Trivia
                     try { await channel.SendMessageAsync($"☑️ {guildUser.Mention} guessed it! The answer was: **{CurrentQuestion.Answer}**").ConfigureAwait(false); } catch (Exception ex) { _log.Warn(ex); }
                     if (Users[guildUser] != WinRequirement) return;
                     ShouldStopGame = true;
+                    await CurrencyHandler.AddCurrencyAsync(guildUser, "Won Trivia", 2, false).ConfigureAwait(false);
                     await channel.SendMessageAsync($":exclamation: We have a winner! It's {guildUser.Mention}.").ConfigureAwait(false);
                 }
                 catch (Exception ex) { _log.Warn(ex); }
