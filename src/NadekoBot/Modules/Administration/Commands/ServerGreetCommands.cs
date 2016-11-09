@@ -71,6 +71,7 @@ namespace NadekoBot.Modules.Administration
             {
                 var joinedTask = Task.Run(async () =>
                 {
+					await Task.Delay(500).ConfigureAwait(false); //Might need to remove the config await bit
                     try
                     {
                         GuildConfig conf;
