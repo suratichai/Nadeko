@@ -34,6 +34,8 @@ namespace NadekoBot.Modules.Games.Trivia
 
         public bool GameActive { get; private set; } = false;
         public bool ShouldStopGame { get; private set; }
+        
+        public int WinRequirement { get; } = 10;
 
         public TriviaGame(IGuild guild, ITextChannel channel, bool showHints, int winReq = 10)
         {
