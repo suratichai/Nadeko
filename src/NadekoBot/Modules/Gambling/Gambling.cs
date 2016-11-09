@@ -207,12 +207,12 @@ namespace NadekoBot.Modules.Gambling
             }
             else if (rng < 90)
             {
-                str += $"Congratulations! You won {amount * 2}{Gambling.CurrencySign} for rolling above 66";
+                str += $"Congratulations! You won {toWin}{Gambling.CurrencySign} for rolling above 66";
                 await CurrencyHandler.AddCurrencyAsync(guildUser, "Betroll Gamble", toWin, false).ConfigureAwait(false);
             }
             else if (rng < 100)
             {
-                str += $"Congratulations! You won {amount * 3}{Gambling.CurrencySign} for rolling above 90.";
+                str += $"Congratulations! You won {amount * 5}{Gambling.CurrencySign} for rolling above 90.";
                 await CurrencyHandler.AddCurrencyAsync(guildUser, "Betroll Gamble", amount * 5, false).ConfigureAwait(false);
             }
             else
