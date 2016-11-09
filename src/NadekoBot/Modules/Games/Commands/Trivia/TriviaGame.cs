@@ -1,6 +1,8 @@
-﻿using Discord;
+using Discord;
 using Discord.Net;
+using NadekoBot.Attributes;
 using NadekoBot.Extensions;
+using NadekoBot.Services;
 using NLog;
 using System;
 using System.Collections.Concurrent;
@@ -57,7 +59,7 @@ namespace NadekoBot.Modules.Games.Trivia
             Task.Run(async () => { try { await StartGame().ConfigureAwait(false); } catch { } });
         }
 
-        private async Task StartGame()
+        public async Task StartGame()
         {
             while (!ShouldStopGame)
             {
@@ -165,7 +167,7 @@ namespace NadekoBot.Modules.Games.Trivia
                     if (Users[guildUser] != WinRequirement) return;
                     ShouldStopGame = true;
                     await CurrencyHandler.AddCurrencyAsync(guildUser, "Won Trivia", 2, false).ConfigureAwait(false);
-                    await channel.SendMessageAsync($":exclamation: We have a winner! It's {guildUser.Mention}.").ConfigureAwait(false);
+                    await channel.SendMessageAsync($":exclamation: We have a winner! It's {guildUser.Mention}, +2 Currency!.").ConfigureAwait(false);
                 }
                 catch (Exception ex) { _log.Warn(ex); }
             });
