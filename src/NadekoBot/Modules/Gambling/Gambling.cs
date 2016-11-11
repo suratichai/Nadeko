@@ -205,7 +205,7 @@ namespace NadekoBot.Modules.Gambling
             {
                 str += "More luck next time.";
             }
-            else if (rng < 90)
+            else if (rng < 91)
             {
                 str += $"Congratulations! You won {toWin}{Gambling.CurrencySign} for rolling above 66";
                 await CurrencyHandler.AddCurrencyAsync(guildUser, "Betroll Gamble", toWin, false).ConfigureAwait(false);
