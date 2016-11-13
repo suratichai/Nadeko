@@ -3,7 +3,6 @@
 src/NadekoBot/credentials.json
 src/NadekoBot/data/NadekoBot.db
 src/NadekoBot/data/musicdata
-src/NadekoBot/data/currency_images
 
 # Created by https://www.gitignore.io/api/visualstudio,visualstudiocode,windows,linux,macos
 
