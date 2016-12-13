@@ -2,20 +2,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using NLog;
 using System.Diagnostics;
 using Discord.Commands;
-using NadekoBot.Services.Database;
 using NadekoBot.Services.Database.Models;
 using NadekoBot.Modules.Permissions;
-using Microsoft.Data.Sqlite;
 using Discord.Net;
 using NadekoBot.Extensions;
 using static NadekoBot.Modules.Permissions.Permissions;
-using System.Collections.Concurrent;
 using NadekoBot.Modules.Help;
 using static NadekoBot.Modules.Administration.Administration;
 using NadekoBot.Modules.CustomReactions;
@@ -43,7 +39,7 @@ namespace NadekoBot.Services
 
         private List<IDMChannel> ownerChannels { get; set; }
 
-        public event EventHandler<CommandExecutedEventArgs> CommandExecuted = delegate { };
+        public event Func<IUserMessage,Command, Task> CommandExecuted = delegate { return Task.CompletedTask; };
 
         public CommandHandler(ShardedDiscordClient client, CommandService commandService)
         {
@@ -158,7 +154,7 @@ namespace NadekoBot.Services
                     var channel = (usrMsg.Channel as ITextChannel);
                     if (result.IsSuccess)
                     {
-                        CommandExecuted(this, new CommandExecutedEventArgs(usrMsg, command));
+                        await CommandExecuted(usrMsg, command);
                         _log.Info("Command Executed after {4}s\n\t" +
                                     "User: {0}\n\t" +
                                     "Server: {1}\n\t" +
@@ -189,7 +185,7 @@ namespace NadekoBot.Services
                         if (guild != null && command != null && result.Error == CommandError.Exception)
                         {
                             if (permCache != null && permCache.Verbose)
-                                try { await msg.Channel.SendMessageAsync(":warning: " + result.ErrorReason).ConfigureAwait(false); } catch { }
+                                try { await msg.Channel.SendMessageAsync("⚠️ " + result.ErrorReason).ConfigureAwait(false); } catch { }
                         }
                     }
                     else

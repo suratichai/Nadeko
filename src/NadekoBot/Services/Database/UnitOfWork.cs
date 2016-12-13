@@ -1,9 +1,6 @@
 ﻿using NadekoBot.Services.Database.Repositories;
 using NadekoBot.Services.Database.Repositories.Impl;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace NadekoBot.Services.Database
@@ -50,6 +47,9 @@ namespace NadekoBot.Services.Database
 
         private ICustomReactionRepository _customReactions;
         public ICustomReactionRepository CustomReactions => _customReactions ?? (_customReactions = new CustomReactionsRepository(_context));
+
+        private IPokeGameRepository _pokegame;
+        public IPokeGameRepository PokeGame => _pokegame ?? (_pokegame = new PokeGameRepository(_context));
 
         public UnitOfWork(NadekoContext context)
         {
