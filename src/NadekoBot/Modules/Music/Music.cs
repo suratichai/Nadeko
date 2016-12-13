@@ -328,8 +328,8 @@ namespace NadekoBot.Modules.Music
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        [OwnerOnly]
-        public async Task LocalPl(IUserMessage umsg, [Remainder] string directory)
+	[RequirePermission(GuildPermission.ManageGuild)]
+	public async Task LocalPl(IUserMessage umsg, [Remainder] string directory)
         {
             var channel = (ITextChannel)umsg.Channel;
             var arg = directory;
@@ -377,7 +377,7 @@ namespace NadekoBot.Modules.Music
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        [OwnerOnly]
+        [RequirePermission(GuildPermission.ManageGuild)]
         public async Task Local(IUserMessage umsg, [Remainder] string path)
         {
             var channel = (ITextChannel)umsg.Channel;
