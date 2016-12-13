@@ -166,10 +166,10 @@
     <value>greetdel grdel</value>
   </data>
   <data name="greetdel_desc" xml:space="preserve">
-    <value>Toggles automatic deletion of greet messages.</value>
+    <value>Sets the time it takes (in seconds) for greet messages to be auto-deleted. Set 0 to disable automatic deletion.</value>
   </data>
   <data name="greetdel_usage" xml:space="preserve">
-    <value>`{0}greetdel`</value>
+    <value>`{0}greetdel 0` or `{0}greetdel 30`</value>
   </data>
   <data name="greet_cmd" xml:space="preserve">
     <value>greet</value>
@@ -211,10 +211,10 @@
     <value>byedel</value>
   </data>
   <data name="byedel_desc" xml:space="preserve">
-    <value>Toggles automatic deletion of bye messages.</value>
+    <value>Sets the time it takes (in seconds) for bye messages to be auto-deleted. Set 0 to disable automatic deletion.</value>
   </data>
   <data name="byedel_usage" xml:space="preserve">
-    <value>`{0}byedel`</value>
+    <value>`{0}byedel 0` or `{0}byedel 30`</value>
   </data>
   <data name="greetdm_cmd" xml:space="preserve">
     <value>greetdm</value>
@@ -427,7 +427,7 @@
     <value>addcustreact acr</value>
   </data>
   <data name="addcustreact_desc" xml:space="preserve">
-    <value>Add a custom reaction with a trigger and a response. Running this command in server requires Administration permission. Running this command in DM is Bot Owner only and adds a new global custom reaction. Guide here: &lt;http://nadekobot.readthedocs.io/en/1.0/Custom%20Reactions/&gt;</value>
+    <value>Add a custom reaction with a trigger and a response. Running this command in server requires Administration permission. Running this command in DM is Bot Owner only and adds a new global custom reaction. Guide here: &lt;http://nadekobot.readthedocs.io/en/latest/Custom%20Reactions/&gt;</value>
   </data>
   <data name="addcustreact_usage" xml:space="preserve">
     <value>`{0}acr "hello" Hi there %user%`</value>
@@ -436,10 +436,19 @@
     <value>listcustreact lcr</value>
   </data>
   <data name="listcustreact_desc" xml:space="preserve">
-    <value>Lists global or server custom reactions (15 commands per page). Running the command in DM will list global custom reactions, while running it in server will list that server's custom reactions.</value>
+    <value>Lists global or server custom reactions (20 commands per page). Running the command in DM will list global custom reactions, while running it in server will list that server's custom reactions. Specifying `all` argument instead of the number will DM you a text file with a list of all custom reactions.</value>
   </data>
   <data name="listcustreact_usage" xml:space="preserve">
-    <value>`{0}lcr 1`</value>
+    <value>`{0}lcr 1` or `{0}lcr all`</value>
+  </data>
+  <data name="listcustreactg_cmd" xml:space="preserve">
+    <value>listcustreactg lcrg</value>
+  </data>
+  <data name="listcustreactg_desc" xml:space="preserve">
+    <value>Lists global or server custom reactions (20 commands per page) grouped by trigger, and show a number of responses for each. Running the command in DM will list global custom reactions, while running it in server will list that server's custom reactions.</value>
+  </data>
+  <data name="listcustreactg_usage" xml:space="preserve">
+    <value>`{0}lcrg 1`</value>
   </data>
   <data name="showcustreact_cmd" xml:space="preserve">
     <value>showcustreact scr</value>
@@ -781,7 +790,7 @@
     <value>Sends a message to you or a channel after certain amount of time. First argument is me/here/'channelname'. Second argument is time in a descending order (mo&gt;w&gt;d&gt;h&gt;m) example: 1w5d3h10m. Third argument is a (multiword)message.</value>
   </data>
   <data name="remind_usage" xml:space="preserve">
-    <value>`{0}remind me 1d5h Do something` or `{0}remind #general Start now!`</value>
+    <value>`{0}remind me 1d5h Do something` or `{0}remind #general 1m Start now!`</value>
   </data>
   <data name="remindtemplate_cmd" xml:space="preserve">
     <value>remindtemplate</value>
@@ -1750,10 +1759,10 @@
     <value>removestream rms</value>
   </data>
   <data name="removestream_desc" xml:space="preserve">
-    <value>Removes notifications of a certain streamer on this channel.</value>
+    <value>Removes notifications of a certain streamer from a certain platform on this channel.</value>
   </data>
   <data name="removestream_usage" xml:space="preserve">
-    <value>`{0}rms SomeGuy`</value>
+    <value>`{0}rms Twitch SomeGuy` or `{0}rms Beam SomeOtherGuy`</value>
   </data>
   <data name="liststreams_cmd" xml:space="preserve">
     <value>liststreams ls</value>
@@ -2101,7 +2110,7 @@
     <value>hentai</value>
   </data>
   <data name="hentai_desc" xml:space="preserve">
-    <value>Shows a hentai image from a random website (gelbooru or danbooru or konachan or atfbooru) with a given tag. Tag is optional but preferred. Only 1 tag allowed.</value>
+    <value>Shows a hentai image from a random website (gelbooru or danbooru or konachan or atfbooru or yandere) with a given tag. Tag is optional but preferred. Only 1 tag allowed.</value>
   </data>
   <data name="hentai_usage" xml:space="preserve">
     <value>`{0}hentai yuri`</value>
@@ -2614,7 +2623,7 @@
     <value>hentaibomb</value>
   </data>
   <data name="hentaibomb_desc" xml:space="preserve">
-    <value>Shows a total 4 images (from gelbooru, danbooru, konachan and atfbooru). Tag is optional but preferred.</value>
+    <value>Shows a total 5 images (from gelbooru, danbooru, konachan, yandere and atfbooru). Tag is optional but preferred.</value>
   </data>
   <data name="hentaibomb_usage" xml:space="preserve">
     <value>`{0}hentaibomb yuri`</value>
@@ -2663,5 +2672,77 @@
   </data>
   <data name="wikia_usage" xml:space="preserve">
     <value>`{0}wikia mtg Vigilance` or `{0}wikia mlp Dashy`</value>
+  </data>
+  <data name="yandere_cmd" xml:space="preserve">
+    <value>yandere</value>
+  </data>
+  <data name="yandere_desc" xml:space="preserve">
+    <value>Shows a random image from yandere with a given tag. Tag is optional but preferred. (multiple tags are appended with +)</value>
+  </data>
+  <data name="yandere_usage" xml:space="preserve">
+    <value>`{0}yandere tag1+tag2`</value>
+  </data>
+  <data name="magicthegathering_cmd" xml:space="preserve">
+    <value>magicthegathering mtg</value>
+  </data>
+  <data name="magicthegathering_desc" xml:space="preserve">
+    <value>Searches for a Magic The Gathering card.</value>
+  </data>
+  <data name="magicthegathering_usage" xml:space="preserve">
+    <value>`{0}magicthegathering about face` or `{0}mtg about face`</value>
+  </data>
+  <data name="yodify_cmd" xml:space="preserve">
+    <value>yodify yoda</value>
+  </data>
+  <data name="yodify_desc" xml:space="preserve">
+    <value>Translates your normal sentences into Yoda styled sentences!</value>
+  </data>
+  <data name="yodify_usage" xml:space="preserve">
+    <value>{0}yodify I was once an adventurer like you` or `{0}yoda my feelings hurt`</value>
+  </data>
+  <data name="attack_cmd" xml:space="preserve">
+    <value>attack</value>
+  </data>
+  <data name="attack_desc" xml:space="preserve">
+    <value>Attacks a target with the given move. Use `{0}movelist` to see a list of moves your type can use.</value>
+  </data>
+  <data name="attack_usage" xml:space="preserve">
+    <value>`{0}attack "vine whip" @someguy`</value>
+  </data>
+  <data name="heal_cmd" xml:space="preserve">
+    <value>heal</value>
+  </data>
+  <data name="heal_desc" xml:space="preserve">
+    <value>Heals someone. Revives those who fainted. Costs a NadekoFlower</value>
+  </data>
+  <data name="heal_usage" xml:space="preserve">
+    <value>`{0}heal @someone`</value>
+  </data>
+  <data name="movelist_cmd" xml:space="preserve">
+    <value>movelist ml</value>
+  </data>
+  <data name="movelist_desc" xml:space="preserve">
+    <value>Lists the moves you are able to use</value>
+  </data>
+  <data name="movelist_usage" xml:space="preserve">
+    <value>`{0}ml`</value>
+  </data>
+  <data name="settype_cmd" xml:space="preserve">
+    <value>settype</value>
+  </data>
+  <data name="settype_desc" xml:space="preserve">
+    <value>Set your poketype. Costs a NadekoFlower. Provide no arguments to see a list of available types.</value>
+  </data>
+  <data name="settype_usage" xml:space="preserve">
+    <value>`{0}settype fire` or `{0}settype`</value>
+  </data>
+  <data name="type_cmd" xml:space="preserve">
+    <value>type</value>
+  </data>
+  <data name="type_desc" xml:space="preserve">
+    <value>Get the poketype of the target.</value>
+  </data>
+  <data name="type_usage" xml:space="preserve">
+    <value>`{0}type @someone`</value>
   </data>
 </root>
