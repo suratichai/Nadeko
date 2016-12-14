@@ -28,8 +28,10 @@ namespace NadekoBot.Modules.Utility
             var ownername = await guild.GetUserAsync(guild.OwnerId);
             var textchn = (await guild.GetTextChannelsAsync()).Count();
             var voicechn = (await guild.GetVoiceChannelsAsync()).Count();
-            
+
             var createdAt = new DateTime(2015, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(guild.Id >> 22);
+            DateTime timeNow = DateTime.UtcNow;
+            int days = (int)Math.Abs(Math.Round((createdAt - timeNow).TotalDays));
             var sb = new StringBuilder();
             var users = await guild.GetUsersAsync().ConfigureAwait(false);
             var embed = new EmbedBuilder()
@@ -41,9 +43,10 @@ namespace NadekoBot.Modules.Utility
                 .AddField(fb => fb.WithName("**Text Channels**").WithValue(textchn.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Voice Channels**").WithValue(voicechn.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Created At**").WithValue($"{createdAt.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
+                .AddField(fb => fb.WithName("**Days Since Creation**").WithValue(days.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Region**").WithValue(guild.VoiceRegionId.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Roles**").WithValue(guild.Roles.Count().ToString()).WithIsInline(true))
-                .WithImage(tn => tn.WithUrl(guild.IconUrl))
+                .WithThumbnail(tn => tn.WithUrl(guild.IconUrl))
                 .WithColor(NadekoBot.OkColor);
             if (guild.Emojis.Count() > 0)
             {
@@ -60,12 +63,15 @@ namespace NadekoBot.Modules.Utility
             if (ch == null)
                 return;
             var createdAt = new DateTime(2015, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(ch.Id >> 22);
+            DateTime timeNow = DateTime.UtcNow;
+            int days = (int)Math.Abs(Math.Round((createdAt - timeNow).TotalDays));
             var usercount = (await ch.GetUsersAsync()).Count();
             var embed = new EmbedBuilder()
                 .WithTitle(ch.Name)
                 .WithDescription(ch.Topic?.SanitizeMentions())
                 .AddField(fb => fb.WithName("**ID**").WithValue(ch.Id.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Created At**").WithValue($"{createdAt.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
+                .AddField(fb => fb.WithName("**Days Since Creation**").WithValue(days.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Users**").WithValue(usercount.ToString()).WithIsInline(true))
                 .WithColor(NadekoBot.OkColor);
             await msg.Channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
@@ -80,7 +86,15 @@ namespace NadekoBot.Modules.Utility
 
             if (user == null)
                 return;
-
+            //var createdAt = new DateTime(2015, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((int)user.Id >> 22);
+            //var joinedAt = new DateTime(2015, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((int)user.Id >> 22);
+            var createdA = (DateTimeOffset)user.CreatedAt;
+            var joinedA = (DateTimeOffset)user.JoinedAt;
+            DateTime createdAt = createdA.UtcDateTime;
+            DateTime joinedAt = joinedA.UtcDateTime;
+            DateTime timeNow = DateTime.UtcNow;
+            int daysCreation = (int)Math.Abs(Math.Round((createdAt - timeNow).TotalDays));
+            int daysJoin = (int)Math.Abs(Math.Round((joinedAt - timeNow).TotalDays));
             var embed = new EmbedBuilder()
                 .AddField(fb => fb.WithName("**Name**").WithValue($"**{user.Username}**#{user.Discriminator}").WithIsInline(true));
             if (!string.IsNullOrWhiteSpace(user.Nickname)) {
@@ -88,7 +102,9 @@ namespace NadekoBot.Modules.Utility
             }
             embed.AddField(fb => fb.WithName("**ID**").WithValue(user.Id.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Joined Server**").WithValue($"{user.JoinedAt?.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
-                .AddField(fb => fb.WithName("**Joined Discord**").WithValue($"{user.CreatedAt.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
+                .AddField(fb => fb.WithName("**Days Since Joined**").WithValue(daysJoin.ToString()).WithIsInline(true))
+                .AddField(fb => fb.WithName("**Created At**").WithValue($"{user.CreatedAt.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
+                .AddField(fb => fb.WithName("**Days Since Created**").WithValue(daysCreation.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Current Game**").WithValue($"{(user.Game?.Name == null ? "-" : user.Game.Name)}").WithIsInline(true))
                 .AddField(fb => fb.WithName("**Roles**").WithValue($"**({user.Roles.Count()})** - {string.Join(", ", user.Roles.Select(r => r.Name)).SanitizeMentions()}").WithIsInline(true))
                 .WithThumbnail(tn => tn.WithUrl(user.AvatarUrl))

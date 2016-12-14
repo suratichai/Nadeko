@@ -110,7 +110,7 @@ namespace NadekoBot.Modules.Permissions
                 toSend = Format.Code($"📄 Permissions page {page}") + "\n\n" + String.Join("\n", perms.AsEnumerable().Skip((page - 1) * 20).Take(20).Select(p => $"`{(i++)}.` {(p.Next == null ? Format.Bold(p.GetCommand(channel.Guild) + " [uneditable]") : (p.GetCommand(channel.Guild)))}"));
             }
 
-            await channel.SendMessageAsync(toSend).ConfigureAwait(false);
+            await channel.SendConfirmAsync(toSend).ConfigureAwait(false);
         }
 
         [NadekoCommand, Usage, Description, Aliases]

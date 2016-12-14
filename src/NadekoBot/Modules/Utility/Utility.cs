@@ -174,7 +174,7 @@ namespace NadekoBot.Modules.Utility
                     {
                         Name = $"NadekoBot v{StatsService.BotVersion}",
                         Url = "http://nadekobot.readthedocs.io/en/latest/",
-                        IconUrl = "https://cdn.discordapp.com/avatars/116275390695079945/b21045e778ef21c96d175400e779f0fb.jpg"
+                        IconUrl = "https://cdn.discordapp.com/avatars/205854647531995136/539b7e3eeff47aeb64ad6df4703a2d38.jpg"
                     },
                     Fields = new[] {
                         new EmbedField() {
