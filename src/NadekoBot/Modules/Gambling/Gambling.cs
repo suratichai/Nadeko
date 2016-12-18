@@ -197,24 +197,26 @@ namespace NadekoBot.Modules.Gambling
             if (rng < 67)
             {
                 str += "Better luck next time.";
+                await channel.SendErrorAsync(str).ConfigureAwait(false);
             }
             else if (rng < 91)
             {
                 str += $"Congratulations! You won {toWin}{Gambling.CurrencySign} for rolling above 66";
                 await CurrencyHandler.AddCurrencyAsync(guildUser, "Betroll Gamble", toWin, false).ConfigureAwait(false);
+                await channel.SendConfirmAsync(str).ConfigureAwait(false);
             }
             else if (rng < 100)
             {
                 str += $"Congratulations! You won {amount * 5}{Gambling.CurrencySign} for rolling above 90.";
                 await CurrencyHandler.AddCurrencyAsync(guildUser, "Betroll Gamble", amount * 5, false).ConfigureAwait(false);
+                await channel.SendConfirmAsync(str).ConfigureAwait(false);
             }
             else
             {
                 str += $"👑 Congratulations! You won {amount * 10}{Gambling.CurrencySign} for rolling **100**. 👑";
                 await CurrencyHandler.AddCurrencyAsync(guildUser, "Betroll Gamble", amount * 10, false).ConfigureAwait(false);
+                await channel.SendConfirmAsync(str).ConfigureAwait(false);
             }
-
-            await channel.SendConfirmAsync(str).ConfigureAwait(false);
         }
 
         [NadekoCommand, Usage, Description, Aliases]
