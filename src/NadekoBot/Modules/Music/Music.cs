@@ -13,7 +13,6 @@ using NadekoBot.Extensions;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using NadekoBot.Services.Database;
 using NadekoBot.Services.Database.Models;
 
 namespace NadekoBot.Modules.Music
@@ -21,19 +20,16 @@ namespace NadekoBot.Modules.Music
     [NadekoModule("Music", "!!", AutoLoad = false)]
     public partial class Music : DiscordModule
     {
-        public static ConcurrentDictionary<ulong, MusicPlayer> MusicPlayers = new ConcurrentDictionary<ulong, MusicPlayer>();
+        public static ConcurrentDictionary<ulong, MusicPlayer> MusicPlayers { get; } = new ConcurrentDictionary<ulong, MusicPlayer>();
 
         public const string MusicDataPath = "data/musicdata";
-        private IGoogleApiService _google;
 
-        public Music(ILocalization loc, CommandService cmds, ShardedDiscordClient client, IGoogleApiService google) : base(loc, cmds, client)
+        public Music() : base()
         {
             //it can fail if its currenctly opened or doesn't exist. Either way i don't care
             try { Directory.Delete(MusicDataPath, true); } catch { }
 
             Directory.CreateDirectory(MusicDataPath);
-
-            _google = google;
         }
 
         [NadekoCommand, Usage, Description, Aliases]
@@ -221,7 +217,7 @@ namespace NadekoBot.Modules.Music
             }
             using (var uow = DbHandler.UnitOfWork())
             {
-                uow.GuildConfigs.For(channel.Guild.Id).DefaultMusicVolume = val / 100.0f;
+                uow.GuildConfigs.For(channel.Guild.Id, set => set).DefaultMusicVolume = val / 100.0f;
                 uow.Complete();
             }
             await channel.SendMessageAsync($"🎵 `Default volume set to {val}%`").ConfigureAwait(false);
@@ -260,13 +256,13 @@ namespace NadekoBot.Modules.Music
                 await channel.SendMessageAsync("💢 You need to be in a voice channel on this server.\n If you are already in a voice channel, try rejoining it.").ConfigureAwait(false);
                 return;
             }
-            var plId = (await _google.GetPlaylistIdsByKeywordsAsync(arg).ConfigureAwait(false)).FirstOrDefault();
+            var plId = (await NadekoBot.Google.GetPlaylistIdsByKeywordsAsync(arg).ConfigureAwait(false)).FirstOrDefault();
             if (plId == null)
             {
                 await channel.SendMessageAsync("No search results for that query.");
                 return;
             }
-            var ids = await _google.GetPlaylistTracksAsync(plId, 500).ConfigureAwait(false);
+            var ids = await NadekoBot.Google.GetPlaylistTracksAsync(plId, 500).ConfigureAwait(false);
             if (!ids.Any())
             {
                 await channel.SendMessageAsync($"🎵 `Failed to find any songs.`").ConfigureAwait(false);
@@ -282,9 +278,8 @@ namespace NadekoBot.Modules.Music
                 {
                     await QueueSong(((IGuildUser)umsg.Author), channel, ((IGuildUser)umsg.Author).VoiceChannel, id, true).ConfigureAwait(false);
                 }
-                catch (PlaylistFullException)
-                { break; }
-                catch { }
+                catch (SongNotFoundException) { }
+                catch { break; }
             }
             await msg.ModifyAsync(m => m.Content = "🎵 `Playlist queue complete.`").ConfigureAwait(false);
         }
@@ -579,6 +574,7 @@ namespace NadekoBot.Modules.Music
                 {
                     await QueueSong(usr, channel, usr.VoiceChannel, item.Query, true, item.ProviderType).ConfigureAwait(false);
                 }
+                catch (SongNotFoundException) { }
                 catch { break; }
             }
             if (msg != null)
@@ -748,7 +744,7 @@ namespace NadekoBot.Modules.Music
                 float vol = 1;// SpecificConfigurations.Default.Of(server.Id).DefaultMusicVolume;
                 using (var uow = DbHandler.UnitOfWork())
                 {
-                    vol = uow.GuildConfigs.For(textCh.Guild.Id).DefaultMusicVolume;
+                    vol = uow.GuildConfigs.For(textCh.Guild.Id, set => set).DefaultMusicVolume;
                 }
                 var mp = new MusicPlayer(voiceCh, vol);
 
@@ -793,6 +789,9 @@ namespace NadekoBot.Modules.Music
             {
                 musicPlayer.ThrowIfQueueFull();
                 resolvedSong = await Song.ResolveSong(query, musicType).ConfigureAwait(false);
+
+                if (resolvedSong == null)
+                    throw new SongNotFoundException();
 
                 musicPlayer.AddSong(resolvedSong, queuer.Username);
             }

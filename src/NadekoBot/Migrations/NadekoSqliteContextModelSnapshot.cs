@@ -3,17 +3,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using NadekoBot.Services.Database.Impl;
+using NadekoBot.Services.Database;
+using NadekoBot.Services.Database.Models;
+using NadekoBot.Modules.Music.Classes;
 
 namespace NadekoBot.Migrations
 {
-    [DbContext(typeof(NadekoSqliteContext))]
+    [DbContext(typeof(NadekoContext))]
     partial class NadekoSqliteContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.0.0-rtm-21431");
+                .HasAnnotation("ProductVersion", "1.1.0-rtm-22752");
 
             modelBuilder.Entity("NadekoBot.Services.Database.Models.BlacklistItem", b =>
                 {
@@ -320,6 +322,8 @@ namespace NadekoBot.Migrations
 
                     b.Property<bool>("AutoDeleteByeMessages");
 
+                    b.Property<int>("AutoDeleteByeMessagesTimer");
+
                     b.Property<bool>("AutoDeleteGreetMessages");
 
                     b.Property<int>("AutoDeleteGreetMessagesTimer");
@@ -488,6 +492,22 @@ namespace NadekoBot.Migrations
                     b.ToTable("MusicPlaylists");
                 });
 
+            modelBuilder.Entity("NadekoBot.Services.Database.Models.MutedUserId", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("GuildConfigId");
+
+                    b.Property<ulong>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildConfigId");
+
+                    b.ToTable("MutedUserId");
+                });
+
             modelBuilder.Entity("NadekoBot.Services.Database.Models.Permission", b =>
                 {
                     b.Property<int>("Id")
@@ -654,6 +674,23 @@ namespace NadekoBot.Migrations
                     b.ToTable("SelfAssignableRoles");
                 });
 
+            modelBuilder.Entity("NadekoBot.Services.Database.Models.UserPokeTypes", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<ulong>("UserId");
+
+                    b.Property<string>("type");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("PokeGame");
+                });
+
             modelBuilder.Entity("NadekoBot.Services.Database.Models.BlacklistItem", b =>
                 {
                     b.HasOne("NadekoBot.Services.Database.Models.BotConfig")
@@ -745,6 +782,13 @@ namespace NadekoBot.Migrations
                     b.HasOne("NadekoBot.Services.Database.Models.BotConfig")
                         .WithMany("ModulePrefixes")
                         .HasForeignKey("BotConfigId");
+                });
+
+            modelBuilder.Entity("NadekoBot.Services.Database.Models.MutedUserId", b =>
+                {
+                    b.HasOne("NadekoBot.Services.Database.Models.GuildConfig")
+                        .WithMany("MutedUsers")
+                        .HasForeignKey("GuildConfigId");
                 });
 
             modelBuilder.Entity("NadekoBot.Services.Database.Models.Permission", b =>
