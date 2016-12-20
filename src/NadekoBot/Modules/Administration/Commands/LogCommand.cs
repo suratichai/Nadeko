@@ -203,7 +203,7 @@ namespace NadekoBot.Modules.Administration
                             //str += $"**Name Changed**`{before.Username}#{before.Discriminator}`\n\t\t`New:`{after.ToString()}`";
                             str += $"👤__**{before.Username}#{before.Discriminator}**__ **| Name Changed |** `ID` `{before.Id}`\n\t\t`New:` **{after.ToString()}**";
                         else if (before.Nickname != after.Nickname)
-                            str += $"👤__**{before.Username}#{before.Discriminator}**__ **| Nickname Changed |** `ID` `{before.Id}`\n\t\t`Old:` **{before.Nickname}#{before.Discriminator}**\n\t\t`New:` **{after.Nickname}#{after.Discriminator}**";
+                            str += $"👤__**{before.Username}#{before.Discriminator}**__ **| Nickname Changed |** `ID` `{before.Id}`\n\t\t`Old:` **{before.Nickname}**\n\t\t`New:` **{after.Nickname}**";
                             //str += $"**Nickname Changed**`{before.Username}#{before.Discriminator}`\n\t\t`Old:` {before.Nickname}#{before.Discriminator}\n\t\t`New:` {after.Nickname}#{after.Discriminator}";
                         else if (before.AvatarUrl != after.AvatarUrl)
                             //str += $"**Avatar Changed**👤`{before.Username}#{before.Discriminator}`\n\t {await _google.ShortenUrl(before.AvatarUrl)} `=>` {await _google.ShortenUrl(after.AvatarUrl)}";

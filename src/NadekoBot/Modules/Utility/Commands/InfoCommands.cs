@@ -86,8 +86,6 @@ namespace NadekoBot.Modules.Utility
 
             if (user == null)
                 return;
-            //var createdAt = new DateTime(2015, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((int)user.Id >> 22);
-            //var joinedAt = new DateTime(2015, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds((int)user.Id >> 22);
             var createdA = (DateTimeOffset)user.CreatedAt;
             var joinedA = (DateTimeOffset)user.JoinedAt;
             DateTime createdAt = createdA.UtcDateTime;
