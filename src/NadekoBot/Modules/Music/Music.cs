@@ -508,7 +508,7 @@ namespace NadekoBot.Modules.Music
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task MoveSong(IUserMessage umsg, [Remainder] string fromto)
+        public async Task MoveSong(IUserMessage umsg, int n1, int n2)
         {
             var channel = (ITextChannel)umsg.Channel;
             MusicPlayer musicPlayer;
@@ -516,17 +516,10 @@ namespace NadekoBot.Modules.Music
             {
                 return;
             }
-            fromto = fromto?.Trim();
-            var fromtoArr = fromto.Split('>');
-
-            int n1;
-            int n2;
 
             var playlist = musicPlayer.Playlist as List<Song> ?? musicPlayer.Playlist.ToList();
 
-            if (fromtoArr.Length != 2 || !int.TryParse(fromtoArr[0], out n1) ||
-                !int.TryParse(fromtoArr[1], out n2) || n1 < 1 || n2 < 1 || n1 == n2 ||
-                n1 > playlist.Count || n2 > playlist.Count)
+            if (n1 < 1 || n2 < 1 || n1 == n2 || n1 > playlist.Count || n2 > playlist.Count)
             {
                 await channel.SendErrorAsync("Invalid input.").ConfigureAwait(false);
                 return;
@@ -544,9 +537,7 @@ namespace NadekoBot.Modules.Music
 		.AddField(fb => fb.WithName("**To Position**").WithValue($"#{n2}").WithIsInline(true))
 		.WithColor(NadekoBot.OkColor);
             await channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
-
             //await channel.SendConfirmAsync($"🎵Moved {s.PrettyName} `from #{n1} to #{n2}`").ConfigureAwait(false);
-
 
         }
 
