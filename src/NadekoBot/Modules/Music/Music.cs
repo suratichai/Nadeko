@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using NadekoBot.Attributes;
 using System;
 using System.Linq;
+using System.Text;
 using NadekoBot.Extensions;
 using System.Net.Http;
 using Newtonsoft.Json.Linq;
@@ -129,7 +130,9 @@ namespace NadekoBot.Modules.Music
         public async Task Queue(IUserMessage umsg, [Remainder] string query)
         {
             var channel = (ITextChannel)umsg.Channel;
-
+            string[] converter = query.Split('.');
+            converter[1] = converter[1].Substring(3);
+            if (converter[0] == "https://youtu") { query = converter[0] + "be.com/watch?v=" + converter[1]; }
             await QueueSong(((IGuildUser)umsg.Author), channel, ((IGuildUser)umsg.Author).VoiceChannel, query).ConfigureAwait(false);
             if (channel.Guild.GetCurrentUser().GetPermissions(channel).ManageMessages)
             {
@@ -326,6 +329,9 @@ namespace NadekoBot.Modules.Music
                 await channel.SendErrorAsync("💢 You need to be in a **voice channel** on this server.\n If you are already in a voice channel, try rejoining it.").ConfigureAwait(false);
                 return;
             }
+            string[] converter = arg.Split('.');
+            converter[1] = converter[1].Substring(3);
+            if (converter[0] == "https://youtu") { arg = converter[0] + "be.com/watch?v=" + converter[1]; }
             var plId = (await NadekoBot.Google.GetPlaylistIdsByKeywordsAsync(arg).ConfigureAwait(false)).FirstOrDefault();
             if (plId == null)
             {
