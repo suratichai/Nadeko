@@ -263,7 +263,7 @@ namespace NadekoBot.Modules.Administration
             {
                 await (await user.CreateDMChannelAsync()).SendErrorAsync($"⛔️ **You have been BANNED from `{channel.Guild.Name}` server.**\n" +
                                         $"⚖ *Reason:* {msg}").ConfigureAwait(false);
-                await Task.Delay(2000).ConfigureAwait(false);
+                await Task.Delay(500).ConfigureAwait(false);
             }
             catch { }
             try
@@ -298,7 +298,7 @@ namespace NadekoBot.Modules.Administration
             {
                 await user.SendErrorAsync($"☣ **You have been SOFT-BANNED from `{channel.Guild.Name}` server.**\n" +
               $"⚖ *Reason:* {msg}").ConfigureAwait(false);
-                await Task.Delay(2000).ConfigureAwait(false);
+                await Task.Delay(500).ConfigureAwait(false);
             }
             catch { }
             try
@@ -339,7 +339,7 @@ namespace NadekoBot.Modules.Administration
                 {
                     await user.SendErrorAsync($"‼️**You have been KICKED from `{channel.Guild.Name}` server.**\n" +
                                     $"⚖ *Reason:* {msg}").ConfigureAwait(false);
-                    await Task.Delay(2000).ConfigureAwait(false);
+                    await Task.Delay(500).ConfigureAwait(false);
                 }
                 catch { }
             }
@@ -502,7 +502,6 @@ namespace NadekoBot.Modules.Administration
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        [RequirePermission(GuildPermission.ManageGuild)]
         public async Task Die(IUserMessage umsg)
         {
             try {
@@ -511,7 +510,7 @@ namespace NadekoBot.Modules.Administration
             catch (Exception ex) { 
                                     _log.Warn(ex);
             }
-            await Task.Delay(2000).ConfigureAwait(false);
+            await Task.Delay(500).ConfigureAwait(false);
             Environment.Exit(0);
         }
 
