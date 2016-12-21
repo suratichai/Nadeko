@@ -238,7 +238,7 @@ namespace NadekoBot.Modules.Music
                         id[0] = "https://youtube.com/watch?v=" + id[0];
                     embed = new EmbedBuilder()
                                 .WithAuthor(eab => eab.WithName("Now Playing").WithIconUrl("https://cdn.discordapp.com/attachments/155726317222887425/258605269972549642/music1.png"))
-                                .WithTitle($"{currentSong.SongInfo.Title}")
+                                .WithTitle($"{id[1]}")
                                 .WithUrl($"{id[0]}")
                                 .WithDescription($"{currentSong.PrettyCurrentTime()}")
                                 .WithFooter(ef => ef.WithText($"{currentSong.PrettyProvider} | {currentSong.PrettyUser}"))
