@@ -6,9 +6,11 @@ using NadekoBot.Attributes;
 using NadekoBot.Extensions;
 using NadekoBot.Services;
 using NadekoBot.Services.Database.Models;
+using NLog;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -24,8 +26,8 @@ namespace NadekoBot.Modules.Administration
 
             private static ConcurrentDictionary<ulong, ConcurrentHashSet<ulong>> MutedUsers { get; } = new ConcurrentDictionary<ulong, ConcurrentHashSet<ulong>>();
 
-            public static event Func<IGuildUser, MuteType, Task> UserMuted = delegate { return Task.CompletedTask; };
-            public static event Func<IGuildUser, MuteType, Task> UserUnmuted = delegate { return Task.CompletedTask; };
+            public static event Action<IGuildUser, MuteType> UserMuted = delegate { };
+            public static event Action<IGuildUser, MuteType> UserUnmuted = delegate { };
 
 
             public enum MuteType {
@@ -34,32 +36,43 @@ namespace NadekoBot.Modules.Administration
                 All
             }
 
-            static MuteCommands() {
-                using (var uow = DbHandler.UnitOfWork())
-                {
-                    var configs = NadekoBot.AllGuildConfigs;
-                    GuildMuteRoles = new ConcurrentDictionary<ulong, string>(configs
-                            .Where(c => !string.IsNullOrWhiteSpace(c.MuteRoleName))
-                            .ToDictionary(c => c.GuildId, c => c.MuteRoleName));
+            static MuteCommands()
+            {
+                var _log = LogManager.GetCurrentClassLogger();
+                var sw = Stopwatch.StartNew();
+                
+                var configs = NadekoBot.AllGuildConfigs;
+                GuildMuteRoles = new ConcurrentDictionary<ulong, string>(configs
+                        .Where(c => !string.IsNullOrWhiteSpace(c.MuteRoleName))
+                        .ToDictionary(c => c.GuildId, c => c.MuteRoleName));
 
-                    MutedUsers = new ConcurrentDictionary<ulong, ConcurrentHashSet<ulong>>(configs.ToDictionary(
-                        k => k.GuildId,
-                        v => new ConcurrentHashSet<ulong>(v.MutedUsers.Select(m => m.UserId))
-                    ));
-                }
+                MutedUsers = new ConcurrentDictionary<ulong, ConcurrentHashSet<ulong>>(configs.ToDictionary(
+                    k => k.GuildId,
+                    v => new ConcurrentHashSet<ulong>(v.MutedUsers.Select(m => m.UserId))
+                ));
 
                 NadekoBot.Client.UserJoined += Client_UserJoined;
+
+                sw.Stop();
+                _log.Debug($"Loaded in {sw.Elapsed.TotalSeconds:F2}s");
             }
 
-            private static async Task Client_UserJoined(IGuildUser usr)
+            private static async void Client_UserJoined(IGuildUser usr)
             {
-                ConcurrentHashSet<ulong> muted;
-                MutedUsers.TryGetValue(usr.Guild.Id, out muted);
+                try
+                {
+                    ConcurrentHashSet<ulong> muted;
+                    MutedUsers.TryGetValue(usr.Guild.Id, out muted);
 
-                if (muted == null || !muted.Contains(usr.Id))
-                    return;
-                else
-                    await Mute(usr).ConfigureAwait(false);
+                    if (muted == null || !muted.Contains(usr.Id))
+                        return;
+                    else
+                        await Mute(usr).ConfigureAwait(false);
+                }
+                catch (Exception ex)
+                {
+                    _log.Warn(ex);
+                }
                     
             }
 
@@ -80,7 +93,7 @@ namespace NadekoBot.Modules.Administration
                     
                     await uow.CompleteAsync().ConfigureAwait(false);
                 }
-                await UserMuted(usr, MuteType.All).ConfigureAwait(false);
+                UserMuted(usr, MuteType.All);
             }
 
             public static async Task Unmute(IGuildUser usr)
@@ -99,7 +112,7 @@ namespace NadekoBot.Modules.Administration
                         muted.TryRemove(usr.Id);
                     await uow.CompleteAsync().ConfigureAwait(false);
                 }
-                await UserUnmuted(usr, MuteType.All).ConfigureAwait(false);
+                UserUnmuted(usr, MuteType.All);
             }
 
             public static async Task<IRole> GetMuteRole(IGuild guild)
@@ -211,7 +224,7 @@ namespace NadekoBot.Modules.Administration
                 try
                 {
                     await user.AddRolesAsync(await GetMuteRole(channel.Guild).ConfigureAwait(false)).ConfigureAwait(false);
-                    await UserMuted(user, MuteType.Chat).ConfigureAwait(false);
+                    UserMuted(user, MuteType.Chat);
                     await channel.SendConfirmAsync($"✏️🚫 **{user}** has been **muted** from chatting.").ConfigureAwait(false);
                 }
                 catch
@@ -230,7 +243,7 @@ namespace NadekoBot.Modules.Administration
                 try
                 {
                     await user.RemoveRolesAsync(await GetMuteRole(channel.Guild).ConfigureAwait(false)).ConfigureAwait(false);
-                    await UserUnmuted(user, MuteType.Chat).ConfigureAwait(false);
+                    UserUnmuted(user, MuteType.Chat);
                     await channel.SendConfirmAsync($"✏️✅ **{user}** has been **unmuted** from chatting.").ConfigureAwait(false);
                 }
                 catch
@@ -249,7 +262,7 @@ namespace NadekoBot.Modules.Administration
                 try
                 {
                     await user.ModifyAsync(usr => usr.Mute = true).ConfigureAwait(false);
-                    await UserMuted(user, MuteType.Voice).ConfigureAwait(false);
+                    UserMuted(user, MuteType.Voice);
                     await channel.SendConfirmAsync($"🎙🚫 **{user}** has been **voice muted**.").ConfigureAwait(false);
                 }
                 catch
@@ -267,7 +280,7 @@ namespace NadekoBot.Modules.Administration
                 try
                 {
                     await user.ModifyAsync(usr => usr.Mute = false).ConfigureAwait(false);
-                    await UserUnmuted(user, MuteType.Voice).ConfigureAwait(false);
+                    UserUnmuted(user, MuteType.Voice);
                     await channel.SendConfirmAsync($"🎙✅ **{user}** has been **voice unmuted**.").ConfigureAwait(false);
                 }
                 catch

@@ -17,6 +17,7 @@ using Newtonsoft.Json;
 using NLog;
 using NadekoBot.Services.Database;
 using NadekoBot.Extensions;
+using System.Diagnostics;
 
 namespace NadekoBot.Modules.Searches
 {
@@ -78,8 +79,8 @@ namespace NadekoBot.Modules.Searches
 
             static StreamNotificationCommands()
             {
+                _log = LogManager.GetCurrentClassLogger();
 
-                _log = NLog.LogManager.GetCurrentClassLogger();
                 checkTimer = new Timer(async (state) =>
                 {
                     oldCachedStatuses = new ConcurrentDictionary<string, StreamStatus>(cachedStatuses);
@@ -108,7 +109,13 @@ namespace NadekoBot.Modules.Searches
                                 var channel = server?.GetTextChannel(fs.ChannelId);
                                 if (channel == null)
                                     return;
-                                try { await channel.EmbedAsync(fs.GetEmbed(newStatus).Build()).ConfigureAwait(false); } catch { }
+                                try
+                                {
+                                    var msg = await channel.EmbedAsync(fs.GetEmbed(newStatus).Build()).ConfigureAwait(false);
+                                    if (!newStatus.IsLive)
+                                        msg.DeleteAfter(60);
+                                }
+                                catch { }
                             }
                         }
                         catch { }

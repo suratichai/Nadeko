@@ -25,6 +25,26 @@ namespace NadekoBot.Extensions
             http.DefaultRequestHeaders.Add("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
         }
 
+        public static EmbedBuilder WithImageUrl(this EmbedBuilder eb, string url) =>
+            eb.WithImage(eib => eib.WithUrl(url));
+
+        public static EmbedBuilder WithOkColor(this EmbedBuilder eb) =>
+            eb.WithColor(NadekoBot.OkColor);
+
+        public static EmbedBuilder WithErrorColor(this EmbedBuilder eb) =>
+            eb.WithColor(NadekoBot.ErrorColor);
+
+        public static IMessage DeleteAfter(this IUserMessage msg, int seconds)
+        {
+            Task.Run(async () =>
+            {
+                await Task.Delay(seconds * 1000);
+                try { await msg.DeleteAsync().ConfigureAwait(false); }
+                catch { }
+            });
+            return msg;
+        }
+
         public static async Task<IMessage> SendMessageToOwnerAsync(this IGuild guild, string message)
         {
             var ownerPrivate = await (await guild.GetOwnerAsync().ConfigureAwait(false)).CreateDMChannelAsync()
@@ -65,6 +85,8 @@ namespace NadekoBot.Extensions
 
         public static double UnixTimestamp(this DateTime dt) => dt.ToUniversalTime().Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
 
+        public static DateTime ToUnixTimestamp(this double number) => new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).AddSeconds(number);
+
         public static async Task<IUserMessage> SendMessageAsync(this IGuildUser user, string message, bool isTTS = false) =>
             await (await user.CreateDMChannelAsync().ConfigureAwait(false)).SendMessageAsync(message, isTTS).ConfigureAwait(false);
 
@@ -95,14 +117,34 @@ namespace NadekoBot.Extensions
         public static Task<IUserMessage> EmbedAsync(this IMessageChannel ch, Discord.API.Embed embed, string msg = "")
              => ch.SendMessageAsync(msg, embed: embed);
 
-        public static Task<IUserMessage> SendErrorAsync(this IMessageChannel ch, string title, string error, string url = null)
-             => ch.SendMessageAsync("", embed: new Embed() { Description = error, Title = title, Url = url, Color = NadekoBot.ErrorColor });
+        public static Task<IUserMessage> SendErrorAsync(this IMessageChannel ch, string title, string error, string url = null, string footer = null)
+             => ch.SendMessageAsync("", embed: new Embed()
+             {
+                 Description = error,
+                 Title = title,
+                 Url = url,
+                 Color = NadekoBot.ErrorColor,
+                 Footer = new Discord.API.EmbedFooter()
+                 {
+                     Text = footer
+                 }
+             });
 
         public static Task<IUserMessage> SendErrorAsync(this IMessageChannel ch, string error)
              => ch.SendMessageAsync("", embed: new Embed() { Description = error, Color = NadekoBot.ErrorColor });
 
-        public static Task<IUserMessage> SendConfirmAsync(this IMessageChannel ch, string title, string text, string url = null)
-             => ch.SendMessageAsync("", embed: new Embed() { Description = text, Title = title, Url = url, Color = NadekoBot.OkColor });
+        public static Task<IUserMessage> SendConfirmAsync(this IMessageChannel ch, string title, string text, string url = null, string footer = null)
+             => ch.SendMessageAsync("", embed: new Embed()
+             {
+                 Description = text,
+                 Title = title,
+                 Url = url,
+                 Color = NadekoBot.OkColor,
+                 Footer = new Discord.API.EmbedFooter()
+                 {
+                     Text = footer
+                 }
+             });
 
         public static Task<IUserMessage> SendConfirmAsync(this IMessageChannel ch, string text)
              => ch.SendMessageAsync("", embed: new Embed() { Description = text, Color = NadekoBot.OkColor });

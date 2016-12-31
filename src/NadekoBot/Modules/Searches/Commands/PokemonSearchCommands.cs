@@ -6,6 +6,7 @@ using NadekoBot.Modules.Searches.Models;
 using Newtonsoft.Json;
 using NLog;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -28,6 +29,7 @@ namespace NadekoBot.Modules.Searches
             static PokemonSearchCommands()
             {
                 _log = LogManager.GetCurrentClassLogger();
+
                 if (File.Exists(PokemonListFile))
                 {
                     pokemons = JsonConvert.DeserializeObject<Dictionary<string, SearchPokemon>>(File.ReadAllText(PokemonListFile));
@@ -55,7 +57,7 @@ namespace NadekoBot.Modules.Searches
                     if (kvp.Key.ToUpperInvariant() == pokemon.ToUpperInvariant())
                     {
                         var p = kvp.Value;
-                        await channel.EmbedAsync(new EmbedBuilder().WithColor(NadekoBot.OkColor)
+                        await channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle(kvp.Key.ToTitleCase())
                             .WithDescription(p.BaseStats.ToString())
                             .AddField(efb => efb.WithName("Types").WithValue(string.Join(",\n", p.Types)).WithIsInline(true))
@@ -81,7 +83,7 @@ namespace NadekoBot.Modules.Searches
                 {
                     if (kvp.Key.ToUpperInvariant() == ability)
                     {
-                        await channel.EmbedAsync(new EmbedBuilder().WithColor(NadekoBot.OkColor)
+                        await channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                             .WithTitle(kvp.Value.Name)
                             .WithDescription(kvp.Value.Desc)
                             .AddField(efb => efb.WithName("Rating").WithValue(kvp.Value.Rating.ToString()).WithIsInline(true))

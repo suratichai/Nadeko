@@ -7,6 +7,8 @@ using System.Collections.Concurrent;
 using NadekoBot.Services.Database.Models;
 using Discord;
 using NadekoBot.Extensions;
+using NLog;
+using System.Diagnostics;
 
 namespace NadekoBot.Modules.CustomReactions
 {
@@ -18,14 +20,20 @@ namespace NadekoBot.Modules.CustomReactions
 
         public static ConcurrentDictionary<string, uint> ReactionStats { get; } = new ConcurrentDictionary<string, uint>();
 
+        private static new readonly Logger _log;
+
         static CustomReactions()
         {
+            _log = LogManager.GetCurrentClassLogger();
+            var sw = Stopwatch.StartNew();
             using (var uow = DbHandler.UnitOfWork())
             {
                 var items = uow.CustomReactions.GetAll();
                 GuildReactions = new ConcurrentDictionary<ulong, ConcurrentHashSet<CustomReaction>>(items.Where(g => g.GuildId != null && g.GuildId != 0).GroupBy(k => k.GuildId.Value).ToDictionary(g => g.Key, g => new ConcurrentHashSet<CustomReaction>(g)));
                 GlobalReactions = new ConcurrentHashSet<CustomReaction>(items.Where(g => g.GuildId == null || g.GuildId == 0));
             }
+            sw.Stop();
+            _log.Debug($"Loaded in {sw.Elapsed.TotalSeconds:F2}s");
         }
         public CustomReactions() : base()
         {
@@ -115,7 +123,7 @@ namespace NadekoBot.Modules.CustomReactions
                 reactions.Add(cr);
             }
 
-            await imsg.Channel.EmbedAsync(new EmbedBuilder().WithColor(NadekoBot.OkColor)
+            await imsg.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                 .WithTitle("New Custom Reaction")
                 .WithDescription($"#{cr.Id}")
                 .AddField(efb => efb.WithName("Trigger").WithValue(key))
@@ -172,7 +180,7 @@ namespace NadekoBot.Modules.CustomReactions
             {
                 var txtStream = await customReactions.GroupBy(cr => cr.Trigger)
                                                           .OrderBy(cr => cr.Key)
-                                                          .Select(cr => new { Trigger = cr.Key, Responses = cr.Select(y => y.Response).ToList() })
+                                                          .Select(cr => new { Trigger = cr.Key, Responses = cr.Select(y => new { id = y.Id, text = y.Response }).ToList() })
                                                           .ToJson()
                                                           .ToStream()
                                                           .ConfigureAwait(false);
@@ -225,7 +233,7 @@ namespace NadekoBot.Modules.CustomReactions
                 await imsg.Channel.SendErrorAsync("No custom reaction found with that id.").ConfigureAwait(false);
             else
             {
-                await imsg.Channel.EmbedAsync(new EmbedBuilder().WithColor(NadekoBot.OkColor)
+                await imsg.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithDescription($"#{id}")
                     .AddField(efb => efb.WithName("Trigger").WithValue(found.Trigger))
                     .AddField(efb => efb.WithName("Response").WithValue(found.Response + "\n```css\n" + found.Response + "```"))
@@ -293,7 +301,7 @@ namespace NadekoBot.Modules.CustomReactions
                 {
                     await imsg.Channel.SendErrorAsync("No stats for that trigger found, no action taken.").ConfigureAwait(false);
                 }
-            }            
+            }
         }
 
         [NadekoCommand, Usage, Description, Aliases]
@@ -302,9 +310,9 @@ namespace NadekoBot.Modules.CustomReactions
             if (page < 1)
                 return;
             await imsg.Channel.EmbedAsync(ReactionStats.OrderByDescending(x => x.Value)
-                                               .Skip((page - 1)*9)
+                                               .Skip((page - 1) * 9)
                                                .Take(9)
-                                               .Aggregate(new EmbedBuilder().WithColor(NadekoBot.OkColor).WithTitle($"Custom Reaction stats page #{page}"),
+                                               .Aggregate(new EmbedBuilder().WithOkColor().WithTitle($"Custom Reaction stats page #{page}"),
                                                          (agg, cur) => agg.AddField(efb => efb.WithName(cur.Key).WithValue(cur.Value.ToString()).WithIsInline(true)))
                                                          .Build())
                               .ConfigureAwait(false);

@@ -7,6 +7,7 @@ using NLog;
 using Services.CleverBotApi;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -23,22 +24,25 @@ namespace NadekoBot.Modules.Games
                 public string Status { get; set; }
                 public string Response { get; set; }
             }
-            //user#discrim is the key
-            public static ConcurrentHashSet<string> ChannelsInConversation { get; } = new ConcurrentHashSet<string>();
-            public static ConcurrentDictionary<ulong, ChatterBotSession> CleverbotGuilds { get; } = new ConcurrentDictionary<ulong, ChatterBotSession>();
+
+            public static ConcurrentDictionary<ulong, Lazy<ChatterBotSession>> CleverbotGuilds { get; } = new ConcurrentDictionary<ulong, Lazy<ChatterBotSession>>();
 
             static CleverBotCommands()
             {
                 _log = LogManager.GetCurrentClassLogger();
+                var sw = Stopwatch.StartNew();
 
                 using (var uow = DbHandler.UnitOfWork())
                 {
                     var bot = ChatterBotFactory.Create(ChatterBotType.CLEVERBOT);
-                    CleverbotGuilds = new ConcurrentDictionary<ulong, ChatterBotSession>(
-                        uow.GuildConfigs.GetAll()
+                    CleverbotGuilds = new ConcurrentDictionary<ulong, Lazy<ChatterBotSession>>(
+                        NadekoBot.AllGuildConfigs
                             .Where(gc => gc.CleverbotEnabled)
-                            .ToDictionary(gc => gc.GuildId, gc => bot.CreateSession()));
+                            .ToDictionary(gc => gc.GuildId, gc => new Lazy<ChatterBotSession>(() => bot.CreateSession(), true)));
                 }
+
+                sw.Stop();
+                _log.Debug($"Loaded in {sw.Elapsed.TotalSeconds:F2}s");
             }
 
             public static async Task<bool> TryAsk(IUserMessage msg) {
@@ -47,7 +51,7 @@ namespace NadekoBot.Modules.Games
                 if (channel == null)
                     return false;
 
-                ChatterBotSession cleverbot;
+                Lazy<ChatterBotSession> cleverbot;
                 if (!CleverbotGuilds.TryGetValue(channel.Guild.Id, out cleverbot))
                     return false;
 
@@ -70,7 +74,7 @@ namespace NadekoBot.Modules.Games
 
                 await msg.Channel.TriggerTypingAsync().ConfigureAwait(false);
 
-                var response = await cleverbot.Think(message).ConfigureAwait(false);
+                var response = await cleverbot.Value.Think(message).ConfigureAwait(false);
                 try
                 {
                     await msg.Channel.SendConfirmAsync(response.SanitizeMentions()).ConfigureAwait(false);
@@ -89,7 +93,7 @@ namespace NadekoBot.Modules.Games
             {
                 var channel = (ITextChannel)imsg.Channel;
 
-                ChatterBotSession throwaway;
+                Lazy<ChatterBotSession> throwaway;
                 if (CleverbotGuilds.TryRemove(channel.Guild.Id, out throwaway))
                 {
                     using (var uow = DbHandler.UnitOfWork())
@@ -104,7 +108,7 @@ namespace NadekoBot.Modules.Games
                 var cleverbot = ChatterBotFactory.Create(ChatterBotType.CLEVERBOT);
                 var session = cleverbot.CreateSession();
 
-                CleverbotGuilds.TryAdd(channel.Guild.Id, session);
+                CleverbotGuilds.TryAdd(channel.Guild.Id, new Lazy<ChatterBotSession>(() => session, true));
 
                 using (var uow = DbHandler.UnitOfWork())
                 {

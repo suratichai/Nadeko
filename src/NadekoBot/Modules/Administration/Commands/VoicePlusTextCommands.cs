@@ -4,8 +4,10 @@ using Discord.WebSocket;
 using NadekoBot.Attributes;
 using NadekoBot.Extensions;
 using NadekoBot.Services;
+using NLog;
 using System;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -18,87 +20,89 @@ namespace NadekoBot.Modules.Administration
         public class VoicePlusTextCommands
         {
             private static Regex channelNameRegex = new Regex(@"[^a-zA-Z0-9 -]", RegexOptions.Compiled);
-            
+
             private static ConcurrentHashSet<ulong> voicePlusTextCache { get; }
             static VoicePlusTextCommands()
             {
+                var _log = LogManager.GetCurrentClassLogger();
+                var sw = Stopwatch.StartNew();
                 using (var uow = DbHandler.UnitOfWork())
                 {
                     voicePlusTextCache = new ConcurrentHashSet<ulong>(NadekoBot.AllGuildConfigs.Where(g => g.VoicePlusTextEnabled).Select(g => g.GuildId));
                 }
                 NadekoBot.Client.UserVoiceStateUpdated += UserUpdatedEventHandler;
+
+                sw.Stop();
+                _log.Debug($"Loaded in {sw.Elapsed.TotalSeconds:F2}s");
             }
 
-            private static Task UserUpdatedEventHandler(IUser iuser, IVoiceState before, IVoiceState after)
+            private static async void UserUpdatedEventHandler(IUser iuser, IVoiceState before, IVoiceState after)
             {
                 var user = (iuser as IGuildUser);
                 var guild = user?.Guild;
 
                 if (guild == null)
-                    return Task.CompletedTask;
-                var task = Task.Run(async () =>
+                    return;
+
+                try
                 {
-                    try
+                    var botUserPerms = guild.GetCurrentUser().GuildPermissions;
+
+                    if (before.VoiceChannel == after.VoiceChannel) return;
+
+                    if (!voicePlusTextCache.Contains(guild.Id))
+                        return;
+
+                    if (!botUserPerms.ManageChannels || !botUserPerms.ManageRoles)
                     {
-                        var botUserPerms = guild.GetCurrentUser().GuildPermissions;
-                    
-                        if (before.VoiceChannel == after.VoiceChannel) return;
-                        
-                        if (!voicePlusTextCache.Contains(guild.Id))
-                            return;
-
-                        if (!botUserPerms.ManageChannels || !botUserPerms.ManageRoles)
+                        try
                         {
-                            try
-                            {
-                                await (await guild.GetOwnerAsync()).SendErrorAsync(
-                                    "⚠️ I don't have **manage server** and/or **manage channels** permission," +
-                                    $" so I cannot run `voice+text` on **{guild.Name}** server.").ConfigureAwait(false);
-                            }
-                            catch { }
-                            using (var uow = DbHandler.UnitOfWork())
-                            {
-                                uow.GuildConfigs.For(guild.Id, set => set).VoicePlusTextEnabled = false;
-                                voicePlusTextCache.TryRemove(guild.Id);
-                                await uow.CompleteAsync().ConfigureAwait(false);
-                            }
-                            return;
+                            await (await guild.GetOwnerAsync()).SendErrorAsync(
+                                "⚠️ I don't have **manage server** and/or **manage channels** permission," +
+                                $" so I cannot run `voice+text` on **{guild.Name}** server.").ConfigureAwait(false);
                         }
-
-
-                        var beforeVch = before.VoiceChannel;
-                        if (beforeVch != null)
+                        catch { }
+                        using (var uow = DbHandler.UnitOfWork())
                         {
-                            var textChannel = guild.GetTextChannels().Where(t => t.Name == GetChannelName(beforeVch.Name).ToLowerInvariant()).FirstOrDefault();
-                            if (textChannel != null)
-                                await textChannel.AddPermissionOverwriteAsync(user,
-                                    new OverwritePermissions(readMessages: PermValue.Deny,
-                                                       sendMessages: PermValue.Deny)).ConfigureAwait(false);
+                            uow.GuildConfigs.For(guild.Id, set => set).VoicePlusTextEnabled = false;
+                            voicePlusTextCache.TryRemove(guild.Id);
+                            await uow.CompleteAsync().ConfigureAwait(false);
                         }
-                        var afterVch = after.VoiceChannel;
-                        if (afterVch != null && guild.AFKChannelId != afterVch.Id)
-                        {
-                            var textChannel = guild.GetTextChannels()
-                                                        .Where(t => t.Name ==  GetChannelName(afterVch.Name).ToLowerInvariant())
-                                                        .FirstOrDefault();
-                            if (textChannel == null)
-                            {
-                                textChannel = (await guild.CreateTextChannelAsync(GetChannelName(afterVch.Name).ToLowerInvariant()).ConfigureAwait(false));
-                                await textChannel.AddPermissionOverwriteAsync(guild.EveryoneRole,
-                                    new OverwritePermissions(readMessages: PermValue.Deny,
-                                                       sendMessages: PermValue.Deny)).ConfigureAwait(false);
-                            }
+                        return;
+                    }
+
+
+                    var beforeVch = before.VoiceChannel;
+                    if (beforeVch != null)
+                    {
+                        var textChannel = guild.GetTextChannels().Where(t => t.Name == GetChannelName(beforeVch.Name).ToLowerInvariant()).FirstOrDefault();
+                        if (textChannel != null)
                             await textChannel.AddPermissionOverwriteAsync(user,
-                                new OverwritePermissions(readMessages: PermValue.Allow,
-                                                        sendMessages: PermValue.Allow)).ConfigureAwait(false);
-                        }
+                                new OverwritePermissions(readMessages: PermValue.Deny,
+                                                   sendMessages: PermValue.Deny)).ConfigureAwait(false);
                     }
-                    catch (Exception ex)
+                    var afterVch = after.VoiceChannel;
+                    if (afterVch != null && guild.AFKChannelId != afterVch.Id)
                     {
-                        Console.WriteLine(ex);
+                        var textChannel = guild.GetTextChannels()
+                                                    .Where(t => t.Name == GetChannelName(afterVch.Name).ToLowerInvariant())
+                                                    .FirstOrDefault();
+                        if (textChannel == null)
+                        {
+                            textChannel = (await guild.CreateTextChannelAsync(GetChannelName(afterVch.Name).ToLowerInvariant()).ConfigureAwait(false));
+                            await textChannel.AddPermissionOverwriteAsync(guild.EveryoneRole,
+                                new OverwritePermissions(readMessages: PermValue.Deny,
+                                                   sendMessages: PermValue.Deny)).ConfigureAwait(false);
+                        }
+                        await textChannel.AddPermissionOverwriteAsync(user,
+                            new OverwritePermissions(readMessages: PermValue.Allow,
+                                                    sendMessages: PermValue.Allow)).ConfigureAwait(false);
                     }
-                });
-                return Task.CompletedTask;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
 
             private static string GetChannelName(string voiceName) =>

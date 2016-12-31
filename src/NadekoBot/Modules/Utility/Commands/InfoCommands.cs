@@ -47,7 +47,7 @@ namespace NadekoBot.Modules.Utility
                 .AddField(fb => fb.WithName("**Region**").WithValue(guild.VoiceRegionId.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Roles**").WithValue(guild.Roles.Count().ToString()).WithIsInline(true))
                 .WithThumbnail(tn => tn.WithUrl(guild.IconUrl))
-                .WithColor(NadekoBot.OkColor);
+                .WithOKColor();
             if (guild.Emojis.Count() > 0)
             {
                 embed.AddField(fb => fb.WithName("**Custom Emojis**").WithValue(Format.Italics(string.Join(", ", guild.Emojis))).WithIsInline(true));
@@ -73,7 +73,7 @@ namespace NadekoBot.Modules.Utility
                 .AddField(fb => fb.WithName("**Created At**").WithValue($"{createdAt.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
                 .AddField(fb => fb.WithName("**Days Since Creation**").WithValue(days.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Users**").WithValue(usercount.ToString()).WithIsInline(true))
-                .WithColor(NadekoBot.OkColor);
+                .WithOkColor();
             await msg.Channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
         }
 
@@ -106,8 +106,34 @@ namespace NadekoBot.Modules.Utility
                 .AddField(fb => fb.WithName("**Current Game**").WithValue($"{(user.Game?.Name == null ? "-" : user.Game.Name)}").WithIsInline(true))
                 .AddField(fb => fb.WithName("**Roles**").WithValue($"**({user.Roles.Count()})** - {string.Join(", ", user.Roles.Select(r => r.Name)).SanitizeMentions()}").WithIsInline(true))
                 .WithThumbnail(tn => tn.WithUrl(user.AvatarUrl))
-                .WithColor(NadekoBot.OkColor);
+                .WithOkColor();
             await msg.Channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
+        }
+
+        [NadekoCommand, Usage, Description, Aliases]
+        [RequireContext(ContextType.Guild)]
+        [OwnerOnly]
+        public async Task Activity(IUserMessage imsg, int page = 1)
+        {
+            const int activityPerPage = 15;
+            page -= 1;
+
+            if (page < 0)
+                return;
+
+            int startCount = page * activityPerPage;
+
+            StringBuilder str = new StringBuilder();
+            foreach (var kvp in NadekoBot.CommandHandler.UserMessagesSent.OrderByDescending(kvp => kvp.Value).Skip(page*activityPerPage).Take(activityPerPage))
+            {
+                str.AppendLine($"`{++startCount}.` **{kvp.Key}** [{kvp.Value/NadekoBot.Stats.GetUptime().TotalSeconds:F2}/s] - {kvp.Value} total");
+            }
+
+            await imsg.Channel.EmbedAsync(new EmbedBuilder().WithTitle($"Activity Page #{page}")
+                .WithOkColor()
+                .WithFooter(efb => efb.WithText($"{NadekoBot.CommandHandler.UserMessagesSent.Count} users total."))
+                .WithDescription(str.ToString())
+                .Build());
         }
     }
 }
