@@ -1609,7 +1609,7 @@
     <value>Moves a song from one position to another.</value>
   </data>
   <data name="movesong_usage" xml:space="preserve">
-    <value>`{0}ms 5&gt;3`</value>
+    <value>`{0}ms 5 3`</value>
   </data>
   <data name="setmaxqueue_cmd" xml:space="preserve">
     <value>setmaxqueue smq</value>
