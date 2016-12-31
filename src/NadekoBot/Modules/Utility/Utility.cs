@@ -224,7 +224,6 @@ namespace NadekoBot.Modules.Utility
                     .WithFooter(efb => efb.WithText($"Playing {Music.Music.MusicPlayers.Where(mp => mp.Value.CurrentSong != null).Count()} songs, {Music.Music.MusicPlayers.Sum(mp => mp.Value.Playlist.Count)} queued."))
 #endif
                     .Build());
->>>>>>> f2773e19a9eb1fdd7526db5cabd3ca1d843facd8
         }
 
         private Regex emojiFinder { get; } = new Regex(@"<:(?<name>.+?):(?<id>\d*)>", RegexOptions.Compiled);

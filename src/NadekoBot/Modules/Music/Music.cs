@@ -39,29 +39,6 @@ namespace NadekoBot.Modules.Music
             Directory.CreateDirectory(MusicDataPath);
         }
 	
-	private Task Client_UserVoiceStateUpdated(IUser iusr, IVoiceState oldState, IVoiceState newState)
-        {
-            var usr = iusr as IGuildUser;
-            if (usr == null ||
-                oldState.VoiceChannel == newState.VoiceChannel)
-                return Task.CompletedTask;
-
-            MusicPlayer player;
-            if (!MusicPlayers.TryGetValue(usr.Guild.Id, out player))
-                return Task.CompletedTask;
-
-            if ((player.PlaybackVoiceChannel == newState.VoiceChannel && //if joined first, and player paused, unpause 
-                    player.Paused &&
-                    player.PlaybackVoiceChannel.GetUsers().Count == 2) ||  // keep in mind bot is in the channel (+1)
-                (player.PlaybackVoiceChannel == oldState.VoiceChannel && // if left last, and player unpaused, pause
-                    !player.Paused &&
-                    player.PlaybackVoiceChannel.GetUsers().Count == 1))
-            {
-                player.TogglePause();
-            }
-            return Task.CompletedTask;
-        }
-
         private void Client_UserVoiceStateUpdated(IUser iusr, IVoiceState oldState, IVoiceState newState)
         {
             var usr = iusr as IGuildUser;
@@ -198,7 +175,6 @@ namespace NadekoBot.Modules.Music
             if (!MusicPlayers.TryGetValue(channel.Guild.Id, out musicPlayer))
             {
                 await channel.SendErrorAsync("🎵 No active music player.").ConfigureAwait(false);
-                umsg.deleteAfer(5);
                 return;
             }
             if (page <= 0)
@@ -251,16 +227,22 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
         public async Task NowPlaying(IUserMessage umsg)
         {
             var channel = (ITextChannel)umsg.Channel;
-            try { await musicPlayer.UpdateSongDurationsAsync().ConfigureAwait(false); } catch { }  
-            var videoid = Regex.Match(currentSong.SongInfo.Query, "<=v=[a-zA-Z0-9-]+(?=&)|(?<=[0-9])[^&\n]+|(?<=v=)[^&\n]+");
 
+            MusicPlayer musicPlayer;
+            if (!MusicPlayers.TryGetValue(channel.Guild.Id, out musicPlayer))
+                return;
+            var currentSong = musicPlayer.CurrentSong;
+            if (currentSong == null)
+                return;
+            try { await musicPlayer.UpdateSongDurationsAsync().ConfigureAwait(false); } catch { }  
+                  var videoid = Regex.Match(currentSong.SongInfo.Query, "<=v=[a-zA-Z0-9-]+(?=&)|(?<=[0-9])[^&\n]+|(?<=v=)[^&\n]+");
                   var embed = new EmbedBuilder().WithOkColor()
                               .WithAuthor(eab => eab.WithName("Now Playing").WithMusicIcon())
                               .WithDescription(currentSong.PrettyName)
                               .WithThumbnail(tn => tn.Url = currentSong.Thumbnail)
                               .WithFooter(ef => ef.WithText(musicPlayer.PrettyVolume + " | " + currentSong.PrettyFullTime + $" | {currentSong.PrettyProvider} | {currentSong.QueuerName}"));
 							  
-                  if (currentSong.SongInfo.Provider.Equals("YouTube", StringComparison.OrdinalIgnoreCase) || currentSong.SongInfo.Provider.Equals("SoundCloud", StringComparison.OrdinalIgnoreCase));
+                  if (!currentSong.SongInfo.Provider.Equals("YouTube", StringComparison.OrdinalIgnoreCase) || !currentSong.SongInfo.Provider.Equals("SoundCloud", StringComparison.OrdinalIgnoreCase))
                   {
                       var pattern = @"\s\s";
                       string[] id = Regex.Split(currentSong.SongInfo.Title, pattern);
@@ -270,17 +252,17 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                           embedimage = "https://img.youtube.com/vi/" + id[0] + "/0.jpg";
                           id[0] = "https://youtube.com/watch?v=" + id[0];
                           
-                          embed = new EmbedBuilder().WithOKColor()
-                                  .WithAuthor(eab => eab.WithName("Now Playing").WithIconUrl("https://cdn.discordapp.com/attachments/155726317222887425/258605269972549642/music1.png"))
-                                  .WithTitle($"{id[1]}")
+                          embed = new EmbedBuilder().WithOkColor()
+                                  .WithAuthor(eab => eab.WithName("Now Playing").WithMusicIcon())
+                                  .WithTitle($"**{id[1]}**")
                                   .WithUrl($"{id[0]}")
-                                  .WithThumbnail(tn => tn.Url = $"{embedimage}");
+                                  .WithThumbnail(tn => tn.Url = $"{embedimage}")
                                   .WithFooter(ef => ef.WithText(musicPlayer.PrettyVolume + " | " + currentSong.PrettyFullTime + $" | {currentSong.PrettyProvider} | {currentSong.QueuerName}"));
                       }
                       else
                       {
-                          embed = new EmbedBuilder().WithOKColor()
-                                      .WithAuthor(eab => eab.WithName("Now Playing").WithIconUrl("https://cdn.discordapp.com/attachments/155726317222887425/258605269972549642/music1.png"))
+                          embed = new EmbedBuilder().WithOkColor()
+                                      .WithAuthor(eab => eab.WithName("Now Playing").WithMusicIcon())
                                       .WithTitle($"{currentSong.SongInfo.Title}")
                                       .WithThumbnail(tn => tn.Url = $"http://i.imgur.com/QfsQvt5.png")
                                       .WithFooter(ef => ef.WithText(musicPlayer.PrettyVolume + " | " + currentSong.PrettyFullTime + $" | {currentSong.PrettyProvider} | {currentSong.QueuerName}"));
@@ -905,28 +887,11 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                     catch { }
                 };
 
-                mp.OnPauseChanged += async (paused) =>
-                {
-                    try
-                    {
-                        IUserMessage pauseMessage = null;
-                        if (paused)
-                        {
-                            pauseMessage = await textCh.SendConfirmAsync("🎵 Music playback **paused**.").ConfigureAwait(false);
-                        }
-                        else
-                        {
-                            pauseMessage = await textCh.SendConfirmAsync("🎵 Music playback **resumed**.").ConfigureAwait(false);
-                        }
-                        if (pauseMessage != null)
-                            pauseMessage.DeleteAfter(15);
-                    }
-                    catch { }
-                };
 		mp.OnPauseChanged += async (paused) =>
                 {
                     try
                     {
+                        IUserMessage pauseMessage = null;
                         if (paused)
                             await textCh.SendConfirmAsync("🎵 Music playback **paused**.").ConfigureAwait(false);
                         else

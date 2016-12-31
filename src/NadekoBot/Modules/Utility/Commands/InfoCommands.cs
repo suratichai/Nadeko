@@ -47,7 +47,7 @@ namespace NadekoBot.Modules.Utility
                 .AddField(fb => fb.WithName("**Region**").WithValue(guild.VoiceRegionId.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Roles**").WithValue(guild.Roles.Count().ToString()).WithIsInline(true))
                 .WithThumbnail(tn => tn.WithUrl(guild.IconUrl))
-                .WithOKColor();
+                .WithOkColor();
             if (guild.Emojis.Count() > 0)
             {
                 embed.AddField(fb => fb.WithName("**Custom Emojis**").WithValue(Format.Italics(string.Join(", ", guild.Emojis))).WithIsInline(true));

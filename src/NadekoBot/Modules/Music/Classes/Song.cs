@@ -285,3 +285,5 @@ namespace NadekoBot.Modules.Music.Classes
 
             return audioSamples;
         }
+    }
+}
