@@ -210,7 +210,7 @@ namespace NadekoBot.Modules.Utility
                 new EmbedBuilder().WithOkColor()
                     .WithAuthor(eab => eab.WithName($"NadekoBot v{StatsService.BotVersion}")
                                           .WithUrl("http://nadekobot.readthedocs.io/en/latest/")
-                                          .WithIconUrl("https://cdn.discordapp.com/avatars/116275390695079945/b21045e778ef21c96d175400e779f0fb.jpg"))
+                                          .WithIconUrl("https://cdn.discordapp.com/avatars/205854647531995136/539b7e3eeff47aeb64ad6df4703a2d38.jpg"))
                     .AddField(efb => efb.WithName(Format.Bold("Author")).WithValue(stats.Author).WithIsInline(true))
                     .AddField(efb => efb.WithName(Format.Bold("Library")).WithValue(stats.Library).WithIsInline(true))
                     .AddField(efb => efb.WithName(Format.Bold("Bot ID")).WithValue(NadekoBot.Client.GetCurrentUser().Id.ToString()).WithIsInline(true))
@@ -220,6 +220,7 @@ namespace NadekoBot.Modules.Utility
                     .AddField(efb => efb.WithName(Format.Bold("Owner ID(s)")).WithValue(stats.OwnerIds).WithIsInline(true))
                     .AddField(efb => efb.WithName(Format.Bold("Uptime")).WithValue(stats.GetUptimeString("\n")).WithIsInline(true))
                     .AddField(efb => efb.WithName(Format.Bold("Presence")).WithValue($"{NadekoBot.Client.GetGuilds().Count} Servers\n{stats.TextChannels} Text Channels\n{stats.VoiceChannels} Voice Channels").WithIsInline(true))
+                    .AddField(efb => efb.WithName(Format.Bold("Host")).WithValue($"Hosted on the Track 44 servers. check them out at [track44.moe](https://track44.moe) and join the discord [here](https://discord.gg/track44)").WithIsInline(false))
 #if !GLOBAL_NADEKO
                     .WithFooter(efb => efb.WithText($"Playing {Music.Music.MusicPlayers.Where(mp => mp.Value.CurrentSong != null).Count()} songs, {Music.Music.MusicPlayers.Sum(mp => mp.Value.Playlist.Count)} queued."))
 #endif
