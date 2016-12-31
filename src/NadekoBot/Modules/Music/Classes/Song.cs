@@ -7,6 +7,7 @@ using System.Diagnostics.Contracts;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
@@ -47,7 +48,22 @@ namespace NadekoBot.Modules.Music.Classes
 
         public string PrettyFullTime => PrettyCurrentTime + " / " + PrettyTotalTime;
 
-        public string PrettyName  => $"**[{SongInfo.Title.TrimTo(65)}]({songUrl})**";
+        public string PrettyName {
+            get {
+                if (SongInfo.Provider.Equals("Local File", StringComparison.OrdinalIgnoreCase))
+                {
+                    var pattern = @"\s\s";
+                    string[] id = Regex.Split(SongInfo.Title, pattern);
+                    if (id[0].Length == 11 && id[1] != null)
+                        return $"**[{id[1].TrimTo(100)}]({songUrl})**";
+                    else
+                        return $"**[{SongInfo.Title.TrimTo(100)}]({songUrl})**";
+                }
+                else    
+                    return $"**[{SongInfo.Title.TrimTo(100)}]({songUrl})**";
+            }
+        }
+
 
         public string PrettyInfo => $"{MusicPlayer.PrettyVolume} | {PrettyTotalTime} | {PrettyProvider} | {QueuerName}";
 
@@ -73,10 +89,14 @@ namespace NadekoBot.Modules.Music.Classes
                     case MusicType.Radio:
                         return $"https://cdn.discordapp.com/attachments/155726317222887425/261850925063340032/1482522097_radio.png"; //test links
                     case MusicType.Normal:
-                        //todo have videoid in songinfo from the start
                         var videoId = Regex.Match(SongInfo.Query, "<=v=[a-zA-Z0-9-]+(?=&)|(?<=[0-9])[^&\n]+|(?<=v=)[^&\n]+");
-                        return $"https://img.youtube.com/vi/{ videoId }/0.jpg";
+                        return $"https://img.youtube.com/vi/{videoId}/0.jpg";
                     case MusicType.Local:
+                        var pattern = @"\s\s";
+                        string[] id = Regex.Split(SongInfo.Title, pattern);
+                        if (id[0].Length == 11)
+                        return $"https://img.youtube.com/vi/{id[0]}/0.jpg";
+                        else
                         return $"https://cdn.discordapp.com/attachments/155726317222887425/261850914783100928/1482522077_music.png"; //test links
                     case MusicType.Soundcloud:
                         return SongInfo.AlbumArt;
@@ -95,6 +115,11 @@ namespace NadekoBot.Modules.Music.Classes
                     case MusicType.Soundcloud:
                         return SongInfo.Query;
                     case MusicType.Local:
+                        var pattern = @"\s\s";
+                        string[] id = Regex.Split(SongInfo.Title, pattern);
+                        if (id[0].Length == 11)
+                        return $"https://youtube.com/watch?v={id[0]}";
+                        else
                         return $"https://google.com/search?q={ WebUtility.UrlEncode(SongInfo.Title).Replace(' ', '+') }";
                     case MusicType.Radio:
                         return $"https://google.com/search?q={SongInfo.Title}";

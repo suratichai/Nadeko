@@ -29,7 +29,6 @@ namespace NadekoBot.Modules.Music
 
         public Music() : base()
         {
-            //it can fail if its currenctly opened or doesn't exist. Either way i don't care
             try { Directory.Delete(MusicDataPath, true); } catch { }
 	    
 	    NadekoBot.Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
@@ -201,7 +200,7 @@ namespace NadekoBot.Modules.Music
                 .WithDescription(string.Join("\n", musicPlayer.Playlist
                     .Skip(startAt)
                     .Take(10)
-                    .Select(v => $"`{++number}.` {v.PrettyFullName}")))
+                    .Select(v => $"**{++number}.** {v.PrettyFullName}")))
                 .WithFooter(ef => ef.WithText($"{musicPlayer.PrettyVolume} | {musicPlayer.Playlist.Count} " +
 $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {total.Minutes}m {total.Seconds}s | " +
 (musicPlayer.FairPlay? "✔️fairplay" : "✖️fairplay") + $" | " + (maxPlaytime == 0 ? "unlimited" : $"{maxPlaytime}s limit")))
@@ -241,33 +240,6 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                               .WithDescription(currentSong.PrettyName)
                               .WithThumbnail(tn => tn.Url = currentSong.Thumbnail)
                               .WithFooter(ef => ef.WithText(musicPlayer.PrettyVolume + " | " + currentSong.PrettyFullTime + $" | {currentSong.PrettyProvider} | {currentSong.QueuerName}"));
-							  
-                  if (!currentSong.SongInfo.Provider.Equals("YouTube", StringComparison.OrdinalIgnoreCase) || !currentSong.SongInfo.Provider.Equals("SoundCloud", StringComparison.OrdinalIgnoreCase))
-                  {
-                      var pattern = @"\s\s";
-                      string[] id = Regex.Split(currentSong.SongInfo.Title, pattern);
-                      string embedimage;
-                      if (id[0].Length == 11)
-                      {
-                          embedimage = "https://img.youtube.com/vi/" + id[0] + "/0.jpg";
-                          id[0] = "https://youtube.com/watch?v=" + id[0];
-                          
-                          embed = new EmbedBuilder().WithOkColor()
-                                  .WithAuthor(eab => eab.WithName("Now Playing").WithMusicIcon())
-                                  .WithTitle($"**{id[1]}**")
-                                  .WithUrl($"{id[0]}")
-                                  .WithThumbnail(tn => tn.Url = $"{embedimage}")
-                                  .WithFooter(ef => ef.WithText(musicPlayer.PrettyVolume + " | " + currentSong.PrettyFullTime + $" | {currentSong.PrettyProvider} | {currentSong.QueuerName}"));
-                      }
-                      else
-                      {
-                          embed = new EmbedBuilder().WithOkColor()
-                                      .WithAuthor(eab => eab.WithName("Now Playing").WithMusicIcon())
-                                      .WithTitle($"{currentSong.SongInfo.Title}")
-                                      .WithThumbnail(tn => tn.Url = $"http://i.imgur.com/QfsQvt5.png")
-                                      .WithFooter(ef => ef.WithText(musicPlayer.PrettyVolume + " | " + currentSong.PrettyFullTime + $" | {currentSong.PrettyProvider} | {currentSong.QueuerName}"));
-                      }
-                  }
                   await channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
         }
 
