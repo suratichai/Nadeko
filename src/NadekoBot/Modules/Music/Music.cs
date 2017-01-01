@@ -31,13 +31,11 @@ namespace NadekoBot.Modules.Music
         {
             try { Directory.Delete(MusicDataPath, true); } catch { }
 	    
-	    NadekoBot.Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
-
             NadekoBot.Client.UserVoiceStateUpdated += Client_UserVoiceStateUpdated;
 
             Directory.CreateDirectory(MusicDataPath);
         }
-	
+
         private void Client_UserVoiceStateUpdated(IUser iusr, IVoiceState oldState, IVoiceState newState)
         {
             var usr = iusr as IGuildUser;
@@ -234,7 +232,6 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
             if (currentSong == null)
                 return;
             try { await musicPlayer.UpdateSongDurationsAsync().ConfigureAwait(false); } catch { }  
-                  var videoid = Regex.Match(currentSong.SongInfo.Query, "<=v=[a-zA-Z0-9-]+(?=&)|(?<=[0-9])[^&\n]+|(?<=v=)[^&\n]+");
                   var embed = new EmbedBuilder().WithOkColor()
                               .WithAuthor(eab => eab.WithName("Now Playing").WithMusicIcon())
                               .WithDescription(currentSong.PrettyName)
@@ -859,15 +856,15 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                     catch { }
                 };
 
-		mp.OnPauseChanged += async (paused) =>
+                mp.OnPauseChanged += async (paused) =>
                 {
                     try
                     {
                         IUserMessage pauseMessage = null;
                         if (paused)
-                            await textCh.SendConfirmAsync("🎵 Music playback **paused**.").ConfigureAwait(false);
+                            pauseMessage = await textCh.SendConfirmAsync("🎵 Music playback **paused**.").ConfigureAwait(false);
                         else
-                            await textCh.SendConfirmAsync("🎵 Music playback **resumed**.").ConfigureAwait(false);
+                            pauseMessage = await textCh.SendConfirmAsync("🎵 Music playback **resumed**.").ConfigureAwait(false);
                         if (pauseMessage != null)
                             pauseMessage.DeleteAfter(1);
                     }

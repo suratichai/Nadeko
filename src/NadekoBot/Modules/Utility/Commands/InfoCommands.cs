@@ -28,7 +28,7 @@ namespace NadekoBot.Modules.Utility
             var ownername = await guild.GetUserAsync(guild.OwnerId);
             var textchn = (await guild.GetTextChannelsAsync()).Count();
             var voicechn = (await guild.GetVoiceChannelsAsync()).Count();
-
+            
             var createdAt = new DateTime(2015, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc).AddMilliseconds(guild.Id >> 22);
             DateTime timeNow = DateTime.UtcNow;
             int days = (int)Math.Abs(Math.Round((createdAt - timeNow).TotalDays));

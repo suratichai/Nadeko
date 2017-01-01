@@ -243,6 +243,8 @@ namespace NadekoBot.Modules.Searches
 
             var resultsElem = document.QuerySelectorAll("#resultStats").FirstOrDefault();
             var totalResults = resultsElem?.TextContent;
+            //var time = resultsElem.Children.FirstOrDefault()?.TextContent
+            //^ this doesn't work for some reason, <nobr> is completely missing in parsed collection
 
             if (!elems.Any())
                 return;
@@ -314,6 +316,7 @@ namespace NadekoBot.Modules.Searches
                                     .AddField(efb => efb.WithName("Store Url").WithValue(storeUrl).WithIsInline(true))
                                     .AddField(efb => efb.WithName("Cost").WithValue(cost).WithIsInline(true))
                                     .AddField(efb => efb.WithName("Types").WithValue(types).WithIsInline(true));
+                    //.AddField(efb => efb.WithName("Store Url").WithValue(await NadekoBot.Google.ShortenUrl(items[0]["store_url"].ToString())).WithIsInline(true));
 
                     await channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
                 }
