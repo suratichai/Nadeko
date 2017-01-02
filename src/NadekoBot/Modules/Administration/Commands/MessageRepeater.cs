@@ -60,7 +60,7 @@ namespace NadekoBot.Modules.Administration
 
                             if (oldMsg != null)
                                 try { await oldMsg.DeleteAsync(); } catch { }
-                            try { oldMsg = await Channel.SendMessageAsync(toSend).ConfigureAwait(false); } catch (Exception ex) { _log.Warn(ex); }
+                            try { oldMsg = await Channel.SendConfirmAsync(toSend).ConfigureAwait(false); } catch (Exception ex) { _log.Warn(ex); }
                         }
                     }
                     catch (OperationCanceledException) { }
@@ -105,7 +105,7 @@ namespace NadekoBot.Modules.Administration
                     return;
                 }
                 rep.Reset();
-                await channel.SendMessageAsync("🔄 " + rep.Repeater.Message).ConfigureAwait(false);
+                await channel.SendConfirmAsync("🔄 " + rep.Repeater.Message).ConfigureAwait(false);
             }
 
             [NadekoCommand, Usage, Description, Aliases]
