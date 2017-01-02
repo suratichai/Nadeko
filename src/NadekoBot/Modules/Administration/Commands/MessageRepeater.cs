@@ -51,7 +51,7 @@ namespace NadekoBot.Modules.Administration
                     {
                         while (!token.IsCancellationRequested)
                         {
-                            var toSend = "🔄 " + Repeater.Message;
+                            var toSend = "🔄\n" + Repeater.Message;
                             await Task.Delay(Repeater.Interval, token).ConfigureAwait(false);
 
                            //var lastMsgInChannel = (await Channel.GetMessagesAsync(2)).FirstOrDefault();
