@@ -195,7 +195,7 @@ namespace NadekoBot.Modules.Gambling
 
             var rng = new NadekoRandom().Next(0, 101);
             var str = $"{guildUser.Mention} `You rolled {rng}.` ";
-	    var toWin = (int)Math.Round(amount * 1.5);
+	    var toWin = (int)Math.Floor(amount * 1.5);
             if (rng < 67)
             {
                 str += "Better luck next time.";

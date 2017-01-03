@@ -817,7 +817,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                     try
                     {
                         if (finishedMessage != null)
-                            finishedMessage.DeleteAfter(0);
+                            finishedMessage.DeleteAfter(1);
 
                         finishedMessage = await textCh.EmbedAsync(new EmbedBuilder().WithOkColor()
                                                   .WithAuthor(eab => eab.WithName("Finished Song").WithMusicIcon())
@@ -844,7 +844,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                     try
                     {
                         if (playingMessage != null)
-                            playingMessage.DeleteAfter(0);
+                            playingMessage.DeleteAfter(2);
 
                         playingMessage = await textCh.EmbedAsync(new EmbedBuilder().WithOkColor()
                                                     .WithAuthor(eab => eab.WithName("Playing Song").WithMusicIcon())
