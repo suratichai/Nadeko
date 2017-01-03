@@ -848,7 +848,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                                                     .WithAuthor(eab => eab.WithName("Playing Song").WithMusicIcon())
                                                     .WithDescription(song.PrettyName)
                                                     .WithFooter(ef => ef.WithText(song.PrettyInfo))
-                                                    .WithThumbnail(tn => tn.Url = s.Thumbnail)
+                                                    .WithThumbnail(tn => tn.Url = song.Thumbnail)
                                                     .Build())
                                                     .ConfigureAwait(false);
                         try { playingMessage.DeleteAfter(5); }

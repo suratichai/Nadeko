@@ -195,7 +195,6 @@ namespace NadekoBot.Modules.Gambling
 
             var rng = new NadekoRandom().Next(0, 101);
             var str = $"{guildUser.Mention} `You rolled {rng}.` ";
-	    var toWin = (int)Math.Floor(amount * 1.5);
             if (rng < 67)
             {
                 str += "Better luck next time.";
@@ -205,8 +204,8 @@ namespace NadekoBot.Modules.Gambling
             {
                 if (rng < 91)
                 {
-                    str += $"Congratulations! You won {toWin}{Gambling.CurrencySign} for rolling above 66";
-                    await CurrencyHandler.AddCurrencyAsync(guildUser, "Betroll Gamble", toWin, false).ConfigureAwait(false);
+                    str += $"Congratulations! You won {Math.Floor(amount * 1.5)}{Gambling.CurrencySign} for rolling above 66";
+                    await CurrencyHandler.AddCurrencyAsync(guildUser, "Betroll Gamble", (long)Math.Floor(amount * 1.5), false).ConfigureAwait(false);
                 }
                 else if (rng < 100)
                 {
