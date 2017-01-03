@@ -4,7 +4,6 @@ using NadekoBot.Attributes;
 using NadekoBot.Extensions;
 using System;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,11 +11,14 @@ namespace NadekoBot.Modules.Utility
 {
     public partial class Utility
     {
-        [NadekoCommand, Usage, Description, Aliases]
-        [RequireContext(ContextType.Guild)]
-        public async Task ServerInfo(IUserMessage msg, string guildName = null)
+        [Group]
+        public class InfoCommands : ModuleBase
         {
-            var channel = (ITextChannel)msg.Channel;
+            [NadekoCommand, Usage, Description, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task ServerInfo(string guildName = null)
+
+            var channel = (ITextChannel)msg.Context.Channel;
             guildName = guildName?.ToUpperInvariant();
             IGuild guild;
             if (string.IsNullOrWhiteSpace(guildName))
@@ -52,12 +54,12 @@ namespace NadekoBot.Modules.Utility
             {
                 embed.AddField(fb => fb.WithName("**Custom Emojis**").WithValue(Format.Italics(string.Join(", ", guild.Emojis))).WithIsInline(true));
             }
-            await msg.Channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
-        }
+            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+            }
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task ChannelInfo(IUserMessage msg, ITextChannel channel = null)
+        public async Task ChannelInfo(ITextChannel channel = null)
         {
             var ch = channel ?? (ITextChannel)msg.Channel;
             if (ch == null)
@@ -74,18 +76,19 @@ namespace NadekoBot.Modules.Utility
                 .AddField(fb => fb.WithName("**Days Since Creation**").WithValue(days.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Users**").WithValue(usercount.ToString()).WithIsInline(true))
                 .WithOkColor();
-            await msg.Channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
+            await Context.Channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
         }
 
-        [NadekoCommand, Usage, Description, Aliases]
-        [RequireContext(ContextType.Guild)]
-        public async Task UserInfo(IUserMessage msg, IGuildUser usr = null)
-        {
-            var channel = (ITextChannel)msg.Channel;
-            var user = usr ?? msg.Author as IGuildUser;
+            [NadekoCommand, Usage, Description, Aliases]
+            [RequireContext(ContextType.Guild)]
+            public async Task UserInfo(IGuildUser usr = null)
+            {
+                var channel = (ITextChannel)Context.Channel;
+                var user = usr ?? Context.User as IGuildUser;
 
             if (user == null)
                 return;
+
             var createdA = (DateTimeOffset)user.CreatedAt;
             var joinedA = (DateTimeOffset)user.JoinedAt;
             DateTime createdAt = createdA.UtcDateTime;
@@ -93,6 +96,7 @@ namespace NadekoBot.Modules.Utility
             DateTime timeNow = DateTime.UtcNow;
             int daysCreation = (int)Math.Abs(Math.Round((createdAt - timeNow).TotalDays));
             int daysJoin = (int)Math.Abs(Math.Round((joinedAt - timeNow).TotalDays));
+
             var embed = new EmbedBuilder()
                 .AddField(fb => fb.WithName("**Name**").WithValue($"**{user.Username}**#{user.Discriminator}").WithIsInline(true));
             if (!string.IsNullOrWhiteSpace(user.Nickname)) {
@@ -132,8 +136,7 @@ namespace NadekoBot.Modules.Utility
             await imsg.Channel.EmbedAsync(new EmbedBuilder().WithTitle($"Activity Page #{page}")
                 .WithOkColor()
                 .WithFooter(efb => efb.WithText($"{NadekoBot.CommandHandler.UserMessagesSent.Count} users total."))
-                .WithDescription(str.ToString())
-                .Build());
+                .WithDescription(str.ToString()));
         }
     }
 }

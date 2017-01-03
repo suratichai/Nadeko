@@ -1,5 +1,6 @@
 using Discord;
 using Discord.Net;
+using Discord.WebSocket;
 using NadekoBot.Attributes;
 using NadekoBot.Extensions;
 using NadekoBot.Services;
@@ -72,7 +73,7 @@ namespace NadekoBot.Modules.Games.Trivia
                         .AddField(eab => eab.WithName("Category").WithValue(CurrentQuestion.Category))
                         .AddField(eab => eab.WithName("Question").WithValue(CurrentQuestion.Question));
 
-                    questionMessage = await channel.EmbedAsync(questionEmbed.Build()).ConfigureAwait(false);
+                    questionMessage = await channel.EmbedAsync(questionEmbed).ConfigureAwait(false);
                 }
                 catch (HttpException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound || ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
                 {
@@ -99,7 +100,7 @@ namespace NadekoBot.Modules.Games.Trivia
                         if (ShowHints)
                             try
                             {
-                                await questionMessage.ModifyAsync(m => m.Embed = questionEmbed.WithFooter(efb => efb.WithText(CurrentQuestion.GetHint())).Build())
+                                await questionMessage.ModifyAsync(m => m.Embed = questionEmbed.WithFooter(efb => efb.WithText(CurrentQuestion.GetHint())))
                                     .ConfigureAwait(false);
                             }
                             catch (HttpException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound || ex.StatusCode == System.Net.HttpStatusCode.Forbidden)
@@ -132,8 +133,7 @@ namespace NadekoBot.Modules.Games.Trivia
             await channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithAuthor(eab => eab.WithName("Trivia Game Ended"))
                     .WithTitle("Final Results")
-                    .WithDescription(GetLeaderboard())
-                    .Build()).ConfigureAwait(false);
+                    .WithDescription(GetLeaderboard())).ConfigureAwait(false);
         }
 
         public async Task StopGame()
@@ -144,14 +144,14 @@ namespace NadekoBot.Modules.Games.Trivia
                 try { await channel.SendConfirmAsync("Trivia Game", "Stopping after this question.").ConfigureAwait(false); } catch (Exception ex) { _log.Warn(ex); }
         }
 
-        private async void PotentialGuess(IMessage imsg)
+        private async void PotentialGuess(SocketMessage imsg)
         {
             try
             {
                 if (imsg.Author.IsBot)
                     return;
 
-                var umsg = imsg as IUserMessage;
+                var umsg = imsg as SocketUserMessage;
                 if (umsg == null)
                     return;
 
@@ -183,7 +183,7 @@ namespace NadekoBot.Modules.Games.Trivia
                     await channel.SendConfirmAsync("Trivia Game", $":{guildUser.Mention} guessed it and won the game and +2 currency. The answer was: **{CurrentQuestion.Answer}**").ConfigureAwait(false);
                     return;
                 }
-                await channel.SendConfirmAsync("Trivia Game", $"{guildUser.Mention} guessed it! The answer was: **{CurrentQuestion.Answer}**").ConfigureAwait(false);
+                await channel.SendConfirmAsync("Trivia Game", $"{ildUser.Mention} guessed it! The answer was: **{CurrentQuestion.Answer}**").ConfigureAwait(false);
 
             }
             catch (Exception ex) { _log.Warn(ex); }
