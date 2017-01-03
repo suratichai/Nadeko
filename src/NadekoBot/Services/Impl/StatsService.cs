@@ -14,7 +14,7 @@ namespace NadekoBot.Services.Impl
         private ShardedDiscordClient client;
         private DateTime started;
 
-        public const string BotVersion = "1.1.0-alpha";
+        public const string BotVersion = "1.1.0-beta";
 
         public string Author => "Kwoth#2560";
         public string Library => "Discord.Net";
@@ -25,9 +25,7 @@ namespace NadekoBot.Services.Impl
         public int TextChannels => client.GetGuilds().SelectMany(g => g.Channels.Where(c => c is ITextChannel)).Count();
         public int VoiceChannels => client.GetGuilds().SelectMany(g => g.Channels.Where(c => c is IVoiceChannel)).Count();
         public string OwnerIds => string.Join(", ", NadekoBot.Credentials.OwnerIds);
-
-
-
+        
         Timer carbonitexTimer { get; }
 
         public StatsService(ShardedDiscordClient client, CommandHandler cmdHandler)
