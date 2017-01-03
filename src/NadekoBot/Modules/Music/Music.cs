@@ -526,8 +526,8 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
             playlist.RemoveAt(nn1);
 
             await channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithTitle(s.PrettyName)
                 .WithAuthor(eab => eab.WithName("Song Moved").WithMusicIcon())
+                .WithDescription($"{s.PrettyName}")
                 .AddField(fb => fb.WithName("**From Position**").WithValue($"#{n1}").WithIsInline(true))
                 .AddField(fb => fb.WithName("**To Position**").WithValue($"#{n2}").WithIsInline(true))
                 .WithFooter(ef => ef.WithText($"{s.PrettyProvider} | {s.QueuerName}"))
