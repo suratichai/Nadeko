@@ -227,9 +227,9 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                                 .WithAuthor(eab => eab.WithName("Now Playing").WithMusicIcon())
                                 .WithDescription(currentSong.PrettyName)
-                                .WithThumbnail(tn => tn.Url = currentSong.Thumbnail)
+                                .WithThumbnailUrl(currentSong.Thumbnail)
                                 .WithFooter(ef => ef.WithText(musicPlayer.PrettyVolume + " | " + currentSong.PrettyFullTime + $" | {currentSong.PrettyProvider} | {currentSong.QueuerName}"))
-                                .Build()).ConfigureAwait(false);
+                                ).ConfigureAwait(false);
         }
 
         [NadekoCommand, Usage, Description, Aliases]
@@ -524,7 +524,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                 .AddField(fb => fb.WithName("**From Position**").WithValue($"#{n1}").WithIsInline(true))
                 .AddField(fb => fb.WithName("**To Position**").WithValue($"#{n2}").WithIsInline(true))
                 .WithFooter(ef => ef.WithText($"{s.PrettyProvider} | {s.QueuerName}"))
-                .Build()).ConfigureAwait(false);
+                ).ConfigureAwait(false);
         }
 
         [NadekoCommand, Usage, Description, Aliases]
@@ -576,7 +576,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                     .WithAuthor(eab => eab.WithMusicIcon().WithName("🔂 Repeating track"))
                     .WithDescription(currentSong.PrettyName)
                     .WithFooter(ef => ef.WithText(currentSong.PrettyInfo))
-                    .Build()).ConfigureAwait(false);
+                    ).ConfigureAwait(false);
             else
                 await Context.Channel.SendConfirmAsync($"🔂 Current track repeat stopped.")
                                             .ConfigureAwait(false);
@@ -806,9 +806,8 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                                                   .WithAuthor(eab => eab.WithName("Finished Song").WithMusicIcon())
                                                   .WithDescription(song.PrettyName)
                                                   .WithFooter(ef => ef.WithText(song.PrettyInfo))
-                                                  .Build())
-                                                  .ConfigureAwait(false);
-                        try { finishedMessage.DeleteAfter(2); }
+                                                  ).ConfigureAwait(false);
+                        try { lastFinishedMessage.DeleteAfter(2); }
                         catch { }
 
                         if (mp.Autoplay && mp.Playlist.Count == 0 && song.SongInfo.Provider == "YouTube")
@@ -834,9 +833,8 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                                                     .WithAuthor(eab => eab.WithName("Playing Song").WithMusicIcon())
                                                     .WithDescription(song.PrettyName)
                                                     .WithFooter(ef => ef.WithText(song.PrettyInfo))
-                                                    .WithThumbnail(tn => tn.Url = song.Thumbnail)
-                                                    .Build())
-                                                    .ConfigureAwait(false);
+                                                    .WithThumbnailUrl(song.Thumbnail)
+                                                    ).ConfigureAwait(false);
                         try { playingMessage.DeleteAfter(5); }
                         catch { }
                     }

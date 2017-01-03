@@ -183,7 +183,7 @@ namespace NadekoBot.Modules.Games.Trivia
                     await channel.SendConfirmAsync("Trivia Game", $":{guildUser.Mention} guessed it and won the game and +2 currency. The answer was: **{CurrentQuestion.Answer}**").ConfigureAwait(false);
                     return;
                 }
-                await channel.SendConfirmAsync("Trivia Game", $"{ildUser.Mention} guessed it! The answer was: **{CurrentQuestion.Answer}**").ConfigureAwait(false);
+                await channel.SendConfirmAsync("Trivia Game", $"{guildUser.Mention} guessed it! The answer was: **{CurrentQuestion.Answer}**").ConfigureAwait(false);
 
             }
             catch (Exception ex) { _log.Warn(ex); }
