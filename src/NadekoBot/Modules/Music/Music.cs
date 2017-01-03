@@ -192,17 +192,15 @@ namespace NadekoBot.Modules.Music
 
             var total = musicPlayer.TotalPlaytime;
             var maxPlaytime = musicPlayer.MaxPlaytimeSeconds;
-            var embed = new EmbedBuilder()
-                .WithAuthor(eab => eab.WithName($"Player Queue - Page {page}")
-                                      .WithMusicIcon())
+            var embed = new EmbedBuilder().WithOkColor()
+                .WithAuthor(eab => eab.WithName($"Player Queue - Page {page}").WithMusicIcon())
                 .WithDescription(string.Join("\n", musicPlayer.Playlist
                     .Skip(startAt)
                     .Take(10)
                     .Select(v => $"**{++number}.** {v.PrettyFullName}")))
                 .WithFooter(ef => ef.WithText($"{musicPlayer.PrettyVolume} | {musicPlayer.Playlist.Count} " +
 $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {total.Minutes}m {total.Seconds}s | " +
-(musicPlayer.FairPlay? "✔️fairplay" : "✖️fairplay") + $" | " + (maxPlaytime == 0 ? "unlimited" : $"{maxPlaytime}s limit")))
-                .WithOkColor();
+(musicPlayer.FairPlay? "✔️fairplay" : "✖️fairplay") + $" | " + (maxPlaytime == 0 ? "unlimited" : $"{maxPlaytime}s limit")));
 
             if (musicPlayer.RepeatSong)
             {
@@ -527,15 +525,13 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
             var nn1 = n2 < n1 ? n1 : n1 - 1;
             playlist.RemoveAt(nn1);
 
-            var embed = new EmbedBuilder()
-                .WithTitle(s.SongInfo.Title.TrimTo(70))
-            .WithUrl(s.SongInfo.Query)
-            .WithAuthor(eab => eab.WithName("Song Moved").WithMusicIcon())
-            .AddField(fb => fb.WithName("**From Position**").WithValue($"#{n1}").WithIsInline(true))
-            .AddField(fb => fb.WithName("**To Position**").WithValue($"#{n2}").WithIsInline(true))
-            .WithFooter(ef => ef.WithText($"{s.PrettyProvider} | {s.QueuerName}"))
-            .WithOkColor();
-            await channel.EmbedAsync(embed.Build()).ConfigureAwait(false);
+            await channel.EmbedAsync(new EmbedBuilder().WithOkColor()
+                .WithTitle(s.PrettyName)
+                .WithAuthor(eab => eab.WithName("Song Moved").WithMusicIcon())
+                .AddField(fb => fb.WithName("**From Position**").WithValue($"#{n1}").WithIsInline(true))
+                .AddField(fb => fb.WithName("**To Position**").WithValue($"#{n2}").WithIsInline(true))
+                .WithFooter(ef => ef.WithText($"{s.PrettyProvider} | {s.QueuerName}"))
+                .Build()).ConfigureAwait(false);
         }
 
         [NadekoCommand, Usage, Description, Aliases]
@@ -817,7 +813,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                     try
                     {
                         if (finishedMessage != null)
-                            finishedMessage.DeleteAfter(1);
+                            finishedMessage.DeleteAfter(0);
 
                         finishedMessage = await textCh.EmbedAsync(new EmbedBuilder().WithOkColor()
                                                   .WithAuthor(eab => eab.WithName("Finished Song").WithMusicIcon())
@@ -825,6 +821,8 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                                                   .WithFooter(ef => ef.WithText(song.PrettyInfo))
                                                   .Build())
                                                   .ConfigureAwait(false);
+                        try { finishedMessage.DeleteAfter(2); }
+                        catch { }
 
                         if (mp.Autoplay && mp.Playlist.Count == 0 && song.SongInfo.Provider == "YouTube")
                         {
@@ -844,7 +842,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                     try
                     {
                         if (playingMessage != null)
-                            playingMessage.DeleteAfter(2);
+                            playingMessage.DeleteAfter(0);
 
                         playingMessage = await textCh.EmbedAsync(new EmbedBuilder().WithOkColor()
                                                     .WithAuthor(eab => eab.WithName("Playing Song").WithMusicIcon())
@@ -852,6 +850,8 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                                                     .WithFooter(ef => ef.WithText(song.PrettyInfo))
                                                     .Build())
                                                     .ConfigureAwait(false);
+                        try { playingMessage.DeleteAfter(5); }
+                        catch { }
                     }
                     catch { }
                 };
@@ -900,7 +900,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                                                             .Build())
                                                             .ConfigureAwait(false);
                     if (queuedMessage != null)
-                        queuedMessage.DeleteAfter(10);
+                        queuedMessage.DeleteAfter(5);
                 }
                 catch { } // if queued message sending fails, don't attempt to delete it
             }
