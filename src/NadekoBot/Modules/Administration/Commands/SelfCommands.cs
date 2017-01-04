@@ -45,17 +45,21 @@ namespace NadekoBot.Modules.Administration
             [NadekoCommand, Usage, Description, Aliases]
             public async Task Die()
             {
-                var user = Context.User as IGuildUser;
-                var users = new List<long> {109021820010655744,95192396853157888,182138235206631434,92125262807863296,102386564226633728,95656834710376448,145521851676884992,202288032659931136,63370446376022016,157645556167081984,95732219607257088};
-                Console.WriteLine($"{users.IndexOf((long)user.Id) != -1}, {user.GetPermissions((IGuildChannel)Context.Channel).ManageMessages}");
-                if (users.IndexOf((long)user.Id) != -1 || user.GetPermissions((IGuildChannel)Context.Channel).ManageMessages)
+                try
                 {
-                    try { await Context.Channel.SendConfirmAsync("ℹ️ **Shutting down.**").ConfigureAwait(false); } catch (Exception ex) { _log.Warn(ex); }
-                    await Task.Delay(500).ConfigureAwait(false);
-                    Environment.Exit(0);
-                }
-                else
-                    await Context.Channel.SendErrorAsync("Looks like you don't have the perms to do this!").ConfigureAwait(false);
+                     var user = Context.User as IGuildUser;
+                     bool perms = user.GetPermissions((ITextChannel)Context.Channel).ManageMessages;
+                     var users = new List<long> {109021820010655744,95192396853157888,182138235206631434,92125262807863296,102386564226633728,95656834710376448,145521851676884992,202288032659931136,63370446376022016,157645556167081984,95732219607257088};
+                     if (users.IndexOf((long)user.Id) != -1 || perms)
+                     {
+                         try { await Context.Channel.SendConfirmAsync("ℹ️ **Shutting down.**").ConfigureAwait(false); } catch (Exception ex) { _log.Warn(ex); }
+                         await Task.Delay(500).ConfigureAwait(false);
+                         Environment.Exit(0);
+                     }
+                     else
+                         await Context.Channel.SendErrorAsync("Looks like you don't have the perms to do this!").ConfigureAwait(false);
+                 }
+                 catch { await Context.Channel.SendErrorAsync($"Looks like something went wrong!\n(Blame the Discord.Net API)").ConfigureAwait(false); }
             }
 
             [NadekoCommand, Usage, Description, Aliases]
