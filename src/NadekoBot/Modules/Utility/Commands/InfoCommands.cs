@@ -48,11 +48,12 @@ namespace NadekoBot.Modules.Utility
                 .AddField(fb => fb.WithName("**Days Since Creation**").WithValue(days.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Region**").WithValue(guild.VoiceRegionId.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Roles**").WithValue(guild.Roles.Count().ToString()).WithIsInline(true))
+                .AddField(fb => fb.WithName("**Icon Link**").WithValue($"[Link]({guild.IconUrl.ToString()})").WithIsInline(true))
                 .WithThumbnailUrl(guild.IconUrl)
                 .WithOkColor();
             if (guild.Emojis.Count() > 0)
             {
-                embed.AddField(fb => fb.WithName("**Custom Emojis**").WithValue(Format.Italics(string.Join(", ", guild.Emojis))).WithIsInline(true));
+                embed.AddField(fb => fb.WithName("**Custom Emojis**").WithValue(Format.Italics(string.Join(", ", guild.Emojis))).WithIsInline(false));
             }
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }
