@@ -119,8 +119,10 @@ namespace NadekoBot.Modules.Searches
                 {
                     var reqString = $"https://www.googleapis.com/customsearch/v1?q={Uri.EscapeDataString(query)}&cx=018084019232060951019%3Ahs5piey28-e&num=1&searchType=image&fields=items%2Flink&key={NadekoBot.Credentials.GoogleApiKey}";
                     var obj = JObject.Parse(await http.GetStringAsync(reqString).ConfigureAwait(false));
-                    var shortened = await NadekoBot.Google.ShortenUrl(obj["items"][0]["link"].ToString()).ConfigureAwait(false);
-                    await Context.Channel.SendMessageAsync(shortened).ConfigureAwait(false);
+                    var image = obj["items"][0]["link"].ToString();
+                    if (image.Substring(Math.Max(0, image.Length - 3)) != "gif")
+                        image = await NadekoBot.Google.ShortenUrl(image).ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync(image).ConfigureAwait(false);
                 }
             }
             catch (HttpRequestException exception)
@@ -150,8 +152,10 @@ namespace NadekoBot.Modules.Searches
                     var reqString = $"https://www.googleapis.com/customsearch/v1?q={Uri.EscapeDataString(query)}&cx=018084019232060951019%3Ahs5piey28-e&num=1&searchType=image&start={ rng.Next(1, 50) }&fields=items%2Flink&key={NadekoBot.Credentials.GoogleApiKey}";
                     var obj = JObject.Parse(await http.GetStringAsync(reqString).ConfigureAwait(false));
                     var items = obj["items"] as JArray;
-                    var shortened = await NadekoBot.Google.ShortenUrl(items[0]["link"].ToString()).ConfigureAwait(false);
-                    await Context.Channel.SendMessageAsync(shortened).ConfigureAwait(false);
+                    var image = items[0]["link"].ToString();
+                    if (image.Substring(Math.Max(0, image.Length - 3)) != "gif")
+                        image = await NadekoBot.Google.ShortenUrl(image).ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync(image).ConfigureAwait(false);
                 }
             }
             catch (HttpRequestException exception)
