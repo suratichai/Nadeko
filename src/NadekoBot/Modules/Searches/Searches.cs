@@ -119,14 +119,15 @@ namespace NadekoBot.Modules.Searches
                 {
                     var reqString = $"https://www.googleapis.com/customsearch/v1?q={Uri.EscapeDataString(query)}&cx=018084019232060951019%3Ahs5piey28-e&num=1&searchType=image&fields=items%2Flink&key={NadekoBot.Credentials.GoogleApiKey}";
                     var obj = JObject.Parse(await http.GetStringAsync(reqString).ConfigureAwait(false));
-                    await Context.Channel.SendMessageAsync(obj["items"][0]["link"].ToString()).ConfigureAwait(false);
+                    var shortened = await NadekoBot.Google.ShortenUrl(obj["items"][0]["link"].ToString()).ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync(shortened).ConfigureAwait(false);
                 }
             }
             catch (HttpRequestException exception)
             {
                 if (exception.Message.Contains("403 (Forbidden)"))
                 {
-                    await Context.Channel.SendErrorAsync("Daily limit reached!");
+                    await Context.Channel.SendErrorAsync("🙅 Daily limit reached!");
                 }
                 else
                 {
@@ -149,14 +150,15 @@ namespace NadekoBot.Modules.Searches
                     var reqString = $"https://www.googleapis.com/customsearch/v1?q={Uri.EscapeDataString(query)}&cx=018084019232060951019%3Ahs5piey28-e&num=1&searchType=image&start={ rng.Next(1, 50) }&fields=items%2Flink&key={NadekoBot.Credentials.GoogleApiKey}";
                     var obj = JObject.Parse(await http.GetStringAsync(reqString).ConfigureAwait(false));
                     var items = obj["items"] as JArray;
-                    await Context.Channel.SendMessageAsync(items[0]["link"].ToString()).ConfigureAwait(false);
+                    var shortened = await NadekoBot.Google.ShortenUrl(items[0]["link"].ToString()).ConfigureAwait(false);
+                    await Context.Channel.SendMessageAsync(shortened).ConfigureAwait(false);
                 }
             }
             catch (HttpRequestException exception)
             {
                 if (exception.Message.Contains("403 (Forbidden)"))
                 {
-                    await Context.Channel.SendErrorAsync("Daily limit reached!");
+                    await Context.Channel.SendErrorAsync("🙅 Daily limit reached!");
                 }
                 else
                 {

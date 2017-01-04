@@ -128,7 +128,7 @@ namespace NadekoBot.Modules.Games
                 }
                 finally
                 {
-                    await Task.Delay(60000);
+                    await Task.Delay(10000);
                     usersRecentlyPicked.TryRemove(Context.User.Id);
                 }
             }
