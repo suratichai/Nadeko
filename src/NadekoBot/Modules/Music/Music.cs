@@ -471,7 +471,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                         .WithErrorColor();
 
                     await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
-
+                    Context.Message.DeleteAfter(3);
                 }
                 catch { }
             };
@@ -492,6 +492,7 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
             if (!MusicPlayers.TryGetValue(Context.Guild.Id, out musicPlayer)) return;
             musicPlayer.ClearQueue();
             await Context.Channel.SendConfirmAsync($"🎵 Queue cleared!").ConfigureAwait(false);
+            Context.Message.DeleteAfter(3);
             return;
         }
 
