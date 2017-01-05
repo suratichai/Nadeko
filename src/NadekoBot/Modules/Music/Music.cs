@@ -98,16 +98,16 @@ namespace NadekoBot.Modules.Music
 
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
-        public async Task Destroy()
+        public Task Destroy()
         {
-            await Context.Channel.SendErrorAsync("This command is temporarily disabled.").ConfigureAwait(false);
-
-            /*MusicPlayer musicPlayer;
-            if (!MusicPlayers.TryGetValue(channel.Guild.Id, out musicPlayer)) return Task.CompletedTask;
-            if (((IGuildUser)umsg.Author).VoiceChannel == musicPlayer.PlaybackVoiceChannel)
-                if(MusicPlayers.TryRemove(channel.Guild.Id, out musicPlayer))
+            MusicPlayer musicPlayer;
+            if (!MusicPlayers.TryGetValue(Context.Guild.Id, out musicPlayer)) return Task.CompletedTask;
+            if (((IGuildUser)Context.User).VoiceChannel == musicPlayer.PlaybackVoiceChannel)
+                if (MusicPlayers.TryRemove(Context.Guild.Id, out musicPlayer))
                     musicPlayer.Destroy();
-            return Task.CompletedTask;*/
+
+            return Task.CompletedTask;
+
         }
 
         [NadekoCommand, Usage, Description, Aliases]
@@ -452,31 +452,16 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
         [NadekoCommand, Usage, Description, Aliases]
         [RequireContext(ContextType.Guild)]
         [Priority(0)]
-        public async Task Remove(int num)
+        public Task Remove(int num)
         {
             MusicPlayer musicPlayer;
             if (!MusicPlayers.TryGetValue(Context.Guild.Id, out musicPlayer))
-                return;
+                return Task.CompletedTask;
             if (((IGuildUser)Context.User).VoiceChannel != musicPlayer.PlaybackVoiceChannel)
-                return;
-
-            musicPlayer.SongRemoved += async (song) =>
-            {
-                try
-                {
-                    var embed = new EmbedBuilder()
-                        .WithAuthor(eab => eab.WithName("Removed song #" + num).WithMusicIcon())
-                        .WithDescription(song.PrettyName)
-                        .WithFooter(ef => ef.WithText(song.PrettyInfo))
-                        .WithErrorColor();
-
-                    await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
-                    Context.Message.DeleteAfter(3);
-                }
-                catch { }
-            };
+                return Task.CompletedTask;
 
             musicPlayer.RemoveSongAt(num - 1);
+            return Task.CompletedTask;
         }
 
         [NadekoCommand, Usage, Description, Aliases]
@@ -484,8 +469,6 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
         [Priority(1)]
         public async Task Remove(string all)
         {
-
-
             if (all.Trim().ToUpperInvariant() != "ALL")
                 return;
             MusicPlayer musicPlayer;
@@ -843,16 +826,34 @@ $"{("tracks".SnPl(musicPlayer.Playlist.Count))} | {(int)total.TotalHours}h {tota
                     catch { }
                 };
                 mp.OnPauseChanged += async (paused) =>
+                        {
+                            try
+                            {
+                                IUserMessage msg;
+                                if (paused)
+                                    msg = await textCh.SendConfirmAsync("🎵 Music playback **paused**.").ConfigureAwait(false);
+                                else
+                                    msg = await textCh.SendConfirmAsync("🎵 Music playback **resumed**.").ConfigureAwait(false);
+
+                                if (msg != null)
+                                    msg.DeleteAfter(3);
+                            }
+                            catch { }
+                        };
+
+
+                mp.SongRemoved += async (song, index) =>
                 {
                     try
                     {
-                        IUserMessage pauseMessage = null;
-                        if (paused)
-                            pauseMessage = await textCh.SendConfirmAsync("🎵 Music playback **paused**.").ConfigureAwait(false);
-                        else
-                            pauseMessage = await textCh.SendConfirmAsync("🎵 Music playback **resumed**.").ConfigureAwait(false);
-                        if (pauseMessage != null)
-                            pauseMessage.DeleteAfter(3);
+                        var embed = new EmbedBuilder()
+                            .WithAuthor(eab => eab.WithName("Removed song #" + (index + 1)).WithMusicIcon())
+                            .WithDescription(song.PrettyName)
+                            .WithFooter(ef => ef.WithText(song.PrettyInfo))
+                            .WithErrorColor();
+
+                        await textCh.EmbedAsync(embed).ConfigureAwait(false);
+
                     }
                     catch { }
                 };

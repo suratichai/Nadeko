@@ -65,9 +65,24 @@ namespace NadekoBot
                 client.ChannelUpdated += (arg1, arg2) => { ChannelUpdated(arg1, arg2); return Task.CompletedTask; };
 
                 _log.Info($"Shard #{i} initialized.");
+                client.Log += Client_Log;
+                var j = i;
+                client.Disconnected += (ex) =>
+                {
+                    _log.Error("Shard #{0} disconnected", j);
+                    _log.Error(ex, ex?.Message ?? "No error");
+                    return Task.CompletedTask;
+                };
             }
 
             Clients = clientList.AsReadOnly();
+        }
+
+        private Task Client_Log(LogMessage arg)
+        {
+            _log.Warn(arg.Message);
+            _log.Error(arg.Exception);
+            return Task.CompletedTask;
         }
 
         public DiscordSocketClient MainClient =>
@@ -85,8 +100,14 @@ namespace NadekoBot
         public Task<IDMChannel> GetDMChannelAsync(ulong channelId) =>
             Clients[0].GetDMChannelAsync(channelId);
 
-        internal Task LoginAsync(TokenType tokenType, string token) =>
-            Task.WhenAll(Clients.Select(async c => { await c.LoginAsync(tokenType, token).ConfigureAwait(false); _log.Info($"Shard #{c.ShardId} logged in."); }));
+        internal async Task LoginAsync(TokenType tokenType, string token)
+        {
+            foreach (var c in Clients)
+            {
+                await c.LoginAsync(tokenType, token).ConfigureAwait(false);
+                _log.Info($"Shard #{c.ShardId} logged in.");
+            }
+        }
 
         internal async Task ConnectAsync()
         {
@@ -126,5 +147,37 @@ namespace NadekoBot
 
 
         public Task SetStream(string name, string url) => Task.WhenAll(Clients.Select(ms => ms.SetGameAsync(name, url, StreamType.NotStreaming)));
+
+        public Task SetStatus(SettableUserStatus status) => Task.WhenAll(Clients.Select(ms => ms.SetStatusAsync(SettableUserStatusToUserStatus(status))));
+
+        private static UserStatus SettableUserStatusToUserStatus(SettableUserStatus sus)
+        {
+            switch (sus)
+            {
+                case SettableUserStatus.Online:
+                    return UserStatus.Online;
+                case SettableUserStatus.Invisible:
+                    return UserStatus.Invisible;
+                case SettableUserStatus.Idle:
+                    return UserStatus.AFK;
+                case SettableUserStatus.Dnd:
+                    return UserStatus.DoNotDisturb;
+            }
+
+            return UserStatus.Online;
+        }
+    }
+
+    public enum SettableUserStatus
+    {
+        Online = 1,
+        On = 1,
+        Invisible = 2,
+        Invis = 2,
+        Idle = 3,
+        Afk = 3,
+        Dnd = 4,
+        DoNotDisturb = 4,
+        Busy = 4,
     }
 }

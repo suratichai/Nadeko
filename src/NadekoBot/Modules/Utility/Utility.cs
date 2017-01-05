@@ -10,12 +10,82 @@ using System.Text.RegularExpressions;
 using System.Reflection;
 using NadekoBot.Services.Impl;
 using System.Net.Http;
+using System.Collections.Concurrent;
+using System.Threading;
+using ImageSharp;
 
 namespace NadekoBot.Modules.Utility
 {
     [NadekoModule("Utility", ".")]
     public partial class Utility : DiscordModule
     {
+        private static ConcurrentDictionary<ulong, Timer> rotatingRoleColors = new ConcurrentDictionary<ulong, Timer>();
+
+        [NadekoCommand, Usage, Description, Aliases]
+        [RequireContext(ContextType.Guild)]
+        [OwnerOnly]
+        public async Task RotateRoleColor(int timeout, IRole role, params string[] hexes)
+        {
+            var channel = (ITextChannel)Context.Channel;
+
+            if ((timeout < 60 && timeout != 0) || timeout > 3600)
+                return;
+
+            Timer t;
+            if (timeout == 0 || hexes.Length == 0)
+            {
+                if (rotatingRoleColors.TryRemove(role.Id, out t))
+                {
+                    t.Change(Timeout.Infinite, Timeout.Infinite);
+                    await channel.SendConfirmAsync($"Stopped rotating colors for the **{role.Name}** role").ConfigureAwait(false);
+                }
+                return;
+            }
+
+            var hexColors = hexes.Select(hex =>
+            {
+                try { return (ImageSharp.Color?)new ImageSharp.Color(hex.Replace("#", "")); } catch { return null; }
+            })
+            .Where(c => c != null)
+            .Select(c => c.Value)
+            .ToArray();
+
+            if (!hexColors.Any())
+            {
+                await channel.SendMessageAsync("No colors are in the correct format. Use `#00ff00` for example.").ConfigureAwait(false);
+                return;
+            }
+
+            var images = hexColors.Select(color =>
+            {
+                var img = new ImageSharp.Image(50, 50);
+                img.BackgroundColor(color);
+                return img;
+            }).Merge().ToStream();
+
+            var i = 0;
+            t = new Timer(async (_) =>
+            {
+                try
+                {
+                    var color = hexColors[i];
+                    await role.ModifyAsync(r => r.Color = new Discord.Color(color.R, color.G, color.B)).ConfigureAwait(false);
+                    ++i;
+                    if (i >= hexColors.Length)
+                        i = 0;
+                }
+                catch { }
+            }, null, 0, timeout * 1000);
+
+            rotatingRoleColors.AddOrUpdate(role.Id, t, (key, old) =>
+            {
+                old.Change(Timeout.Infinite, Timeout.Infinite);
+                return t;
+            });
+            
+            await channel.SendFileAsync(images, "magicalgirl.jpg", $"Rotating **{role.Name}** role's color.").ConfigureAwait(false);
+        }
+
         [NadekoCommand, Usage, Description, Aliases]
         public async Task TogetherTube()
         {
@@ -201,9 +271,7 @@ namespace NadekoBot.Modules.Utility
                     .AddField(efb => efb.WithName(Format.Bold("Uptime")).WithValue(stats.GetUptimeString("\n")).WithIsInline(true))
                     .AddField(efb => efb.WithName(Format.Bold("Presence")).WithValue($"{NadekoBot.Client.GetGuilds().Count} Servers\n{stats.TextChannels} Text Channels\n{stats.VoiceChannels} Voice Channels").WithIsInline(true))
                     .AddField(efb => efb.WithName(Format.Bold("Host")).WithValue($"Hosted on the Track 44 servers. check them out at [track44.moe](https://track44.moe) and join the discord [here](https://discord.gg/track44)").WithIsInline(false))
-#if !GLOBAL_NADEKO
                     .WithFooter(efb => efb.WithText($"Playing {Music.Music.MusicPlayers.Where(mp => mp.Value.CurrentSong != null).Count()} songs, {Music.Music.MusicPlayers.Sum(mp => mp.Value.Playlist.Count)} queued."))
-#endif
                     );
         }
 

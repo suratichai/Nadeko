@@ -46,9 +46,12 @@ namespace NadekoBot.Modules.Games
             {
                 _log = LogManager.GetCurrentClassLogger();
                 var sw = Stopwatch.StartNew();
+
+
 #if !GLOBAL_NADEKO
                 NadekoBot.Client.MessageReceived += PotentialFlowerGeneration;
 #endif
+
                 using (var uow = DbHandler.UnitOfWork())
                 {
                     var conf = uow.BotConfig.GetOrCreate();
@@ -108,9 +111,10 @@ namespace NadekoBot.Modules.Games
             {
                 var channel = (ITextChannel)Context.Channel;
 
-                if (!(await channel.Guild.GetCurrentUserAsync()).GetPermissions(channel).ManageMessages || !usersRecentlyPicked.Add(Context.User.Id))
+                if (!(await channel.Guild.GetCurrentUserAsync()).GetPermissions(channel).ManageMessages)
                     return;
-
+                if (!usersRecentlyPicked.Add(Context.User.Id))
+                    return;
                 try
                 {
 
@@ -159,7 +163,7 @@ namespace NadekoBot.Modules.Games
                 }
                 plantedFlowers.AddOrUpdate(Context.Channel.Id, new List<IUserMessage>() { msg }, (id, old) => { old.Add(msg); return old; });
             }
-#endif
+
             [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             [RequireUserPermission(GuildPermission.ManageMessages)]

@@ -71,7 +71,16 @@ namespace NadekoBot.Modules.Administration
 
                 await NadekoBot.Client.CurrentUser().ModifyAsync(u => u.Username = newName).ConfigureAwait(false);
 
-                await Context.Channel.SendConfirmAsync($"ℹ️ Successfully changed name to **{newName}**").ConfigureAwait(false);
+                await Context.Channel.SendConfirmAsync($"Bot name changed to **{newName}**").ConfigureAwait(false);
+            }
+
+            [NadekoCommand, Usage, Description, Aliases]
+            [OwnerOnly]
+            public async Task SetStatus([Remainder] SettableUserStatus status)
+            {
+                await NadekoBot.Client.SetStatus(status);
+
+                await Context.Channel.SendConfirmAsync($"Bot status changed to **{status}**").ConfigureAwait(false);
             }
 
             [NadekoCommand, Usage, Description, Aliases]
@@ -100,8 +109,6 @@ namespace NadekoBot.Modules.Administration
             [OwnerOnly]
             public async Task SetGame([Remainder] string game = null)
             {
-                game = game ?? "";
-
                 await NadekoBot.Client.SetGame(game).ConfigureAwait(false);
 
                 await Context.Channel.SendConfirmAsync("👾 **New game set.**").ConfigureAwait(false);

@@ -66,13 +66,12 @@ namespace NadekoBot.Services
         {
             try
             {
-
                 var usrMsg = msg as SocketUserMessage;
                 if (usrMsg == null)
                     return;
 
-                if (!usrMsg.IsAuthor())
-                    UserMessagesSent.AddOrUpdate(usrMsg.Author.Id, 1, (key, old) => ++old);
+                //if (!usrMsg.IsAuthor())
+                //    UserMessagesSent.AddOrUpdate(usrMsg.Author.Id, 1, (key, old) => ++old);
 
                 if (msg.Author.IsBot || !NadekoBot.Ready) //no bots
                     return;
@@ -123,16 +122,22 @@ namespace NadekoBot.Services
                 {
                     return;
                 }
+
 #if !GLOBAL_NADEKO
                 try
                 {
                     var cleverbotExecuted = await Games.CleverBotCommands.TryAsk(usrMsg);
-
                     if (cleverbotExecuted)
+                    {
+                        _log.Info($@"CleverBot Executed
+        Server: {guild.Name} [{guild.Id}]
+        Channel: {usrMsg.Channel?.Name} [{usrMsg.Channel?.Id}]
+        UserId: {usrMsg.Author} [{usrMsg.Author.Id}]
+        Message: {usrMsg.Content}");
                         return;
+                    }
                 }
                 catch (Exception ex) { _log.Warn(ex, "Error in cleverbot"); }
-
 #endif
                 try
                 {
