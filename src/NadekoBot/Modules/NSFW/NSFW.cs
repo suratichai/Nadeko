@@ -50,7 +50,7 @@ namespace NadekoBot.Modules.NSFW
             if (string.IsNullOrWhiteSpace(link))
             {
                 if (noError)
-                    await channel.SendErrorAsync("No results found.").ConfigureAwait(false);
+                    await channel.SendMessageAsync("No results found.").ConfigureAwait(false);
                 return;
             }
 
@@ -119,7 +119,7 @@ namespace NadekoBot.Modules.NSFW
             var linksEnum = links?.Where(l => l != null);
             if (links == null || !linksEnum.Any())
             {
-                await Context.Channel.SendErrorAsync("No results found.").ConfigureAwait(false);
+                await Context.Channel.SendMessageAsync("No results found.").ConfigureAwait(false);
                 return;
             }
 
@@ -135,7 +135,7 @@ namespace NadekoBot.Modules.NSFW
             var url = await GetDanbooruImageLink(tag).ConfigureAwait(false);
 
             if (url == null)
-                await Context.Channel.SendErrorAsync(Context.User.Mention + " No results.");
+                await Context.Channel.SendMessageAsync("No results.");
             else
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithDescription(Context.User.Mention + " " + tag)
@@ -167,7 +167,7 @@ namespace NadekoBot.Modules.NSFW
             var url = await GetE621ImageLink(tag).ConfigureAwait(false);
 
             if (url == null)
-                await Context.Channel.SendErrorAsync(Context.User.Mention + " No results.");
+                await Context.Channel.SendMessageAsync("No results.");
             else
                 await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
                     .WithDescription(Context.User.Mention + " " + tag)

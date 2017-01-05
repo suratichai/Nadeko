@@ -109,11 +109,11 @@ namespace NadekoBot.Extensions
                  .WithTitle(title).WithUrl(url));
 
         public static async Task<IUserMessage> SendErrorAsync(this IUser user, string title, string error, string url = null)
-             => await (await user.CreateDMChannelAsync()).SendMessageAsync("", embed: new EmbedBuilder().WithColor(NadekoBot.OkColor).WithDescription(error)
+             => await (await user.CreateDMChannelAsync()).SendMessageAsync("", embed: new EmbedBuilder().WithColor(NadekoBot.ErrorColor).WithDescription(error)
                  .WithTitle(title).WithUrl(url));
 
         public static async Task<IUserMessage> SendErrorAsync(this IUser user, string error)
-             => await (await user.CreateDMChannelAsync()).SendMessageAsync("", embed: new EmbedBuilder().WithColor(NadekoBot.OkColor).WithDescription(error));
+             => await (await user.CreateDMChannelAsync()).SendMessageAsync("", embed: new EmbedBuilder().WithColor(NadekoBot.ErrorColor).WithDescription(error));
 
         public static async Task<IUserMessage> SendFileAsync(this IUser user, string filePath, string caption = null, string text = null, bool isTTS = false) =>
             await (await user.CreateDMChannelAsync().ConfigureAwait(false)).SendFileAsync(File.Open(filePath, FileMode.Open), caption ?? "x", text, isTTS).ConfigureAwait(false);
