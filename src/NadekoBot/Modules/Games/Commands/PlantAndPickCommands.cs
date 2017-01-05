@@ -48,9 +48,7 @@ namespace NadekoBot.Modules.Games
                 var sw = Stopwatch.StartNew();
 
 
-#if !GLOBAL_NADEKO
                 NadekoBot.Client.MessageReceived += PotentialFlowerGeneration;
-#endif
 
                 using (var uow = DbHandler.UnitOfWork())
                 {
@@ -104,7 +102,6 @@ namespace NadekoBot.Modules.Games
                 }
                 catch { }
             }
-#if !GLOBAL_NADEKO
             [NadekoCommand, Usage, Description, Aliases]
             [RequireContext(ContextType.Guild)]
             public async Task Pick()
