@@ -97,7 +97,9 @@ namespace NadekoBot.Modules.Utility
             DateTime timeNow = DateTime.UtcNow;
             int daysCreation = (int)Math.Abs(Math.Round((createdAt - timeNow).TotalDays));
             int daysJoin = (int)Math.Abs(Math.Round((joinedAt - timeNow).TotalDays));
-
+            string avi = user.AvatarUrl;
+            if (user.AvatarId.Substring(0,2) == "a_")
+                avi = avi.Substring(0, avi.Length-3) + "gif";
             var embed = new EmbedBuilder()
                 .AddField(fb => fb.WithName("**Name**").WithValue($"**{user.Username}**#{user.Discriminator}").WithIsInline(true));
             if (!string.IsNullOrWhiteSpace(user.Nickname))
@@ -111,7 +113,7 @@ namespace NadekoBot.Modules.Utility
                 .AddField(fb => fb.WithName("**Days Since Created**").WithValue(daysCreation.ToString()).WithIsInline(true))
                 .AddField(fb => fb.WithName("**Current Game**").WithValue($"{(user.Game?.Name == null ? "-" : user.Game.Value.Name)}").WithIsInline(true))
                 .AddField(fb => fb.WithName("**Roles**").WithValue($"**({user.RoleIds.Count})** - {string.Join(", ", user.GetRoles().Select(r => r.Name)).SanitizeMentions()}").WithIsInline(true))
-                .WithThumbnailUrl(user.AvatarUrl)
+                .WithThumbnailUrl(avi)
                 .WithOkColor();
             await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
             }

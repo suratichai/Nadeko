@@ -613,10 +613,12 @@ namespace NadekoBot.Modules.Searches
         {
             if (usr == null)
                 usr = Context.User;
-
+            string avi = usr.AvatarUrl;
+            if (usr.AvatarId.Substring(0,2) == "a_")
+                avi = avi.Substring(0, avi.Length-3) + "gif";
             await Context.Channel.EmbedAsync(new EmbedBuilder().WithOkColor()
-                .WithTitle($"{usr}'s Avatar")
-                .WithImageUrl(usr.AvatarUrl)).ConfigureAwait(false);
+                .WithDescription($"[**{usr}'s Avatar**]({avi})")
+                .WithImageUrl(avi)).ConfigureAwait(false);
         }
 
         [NadekoCommand, Usage, Description, Aliases]
