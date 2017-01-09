@@ -84,38 +84,41 @@ namespace NadekoBot.Modules.Utility
             [RequireContext(ContextType.Guild)]
             public async Task UserInfo(IGuildUser usr = null)
             {
-                var channel = (ITextChannel)Context.Channel;
-                var user = usr ?? Context.User as IGuildUser;
+                try {
+                    var channel = (ITextChannel)Context.Channel;
+                    var user = usr ?? Context.User as IGuildUser;
 
-            if (user == null)
-                return;
+                    if (user == null)
+                        return;
 
-            var createdA = (DateTimeOffset)user.CreatedAt;
-            var joinedA = (DateTimeOffset)user.JoinedAt;
-            DateTime createdAt = createdA.UtcDateTime;
-            DateTime joinedAt = joinedA.UtcDateTime;
-            DateTime timeNow = DateTime.UtcNow;
-            int daysCreation = (int)Math.Abs(Math.Round((createdAt - timeNow).TotalDays));
-            int daysJoin = (int)Math.Abs(Math.Round((joinedAt - timeNow).TotalDays));
-            string avi = user.AvatarUrl;
-            if (user.AvatarId.Substring(0,2) == "a_")
-                avi = avi.Substring(0, avi.Length-3) + "gif";
-            var embed = new EmbedBuilder()
-                .AddField(fb => fb.WithName("**Name**").WithValue($"**{user.Username}**#{user.Discriminator}").WithIsInline(true));
-            if (!string.IsNullOrWhiteSpace(user.Nickname))
-            {
-                embed.AddField(fb => fb.WithName("**Nickname**").WithValue(user.Nickname).WithIsInline(true));
-            }
-            embed.AddField(fb => fb.WithName("**ID**").WithValue(user.Id.ToString()).WithIsInline(true))
-                .AddField(fb => fb.WithName("**Joined Server**").WithValue($"{user.JoinedAt?.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
-                .AddField(fb => fb.WithName("**Days Since Joined**").WithValue(daysJoin.ToString()).WithIsInline(true))
-                .AddField(fb => fb.WithName("**Created At**").WithValue($"{user.CreatedAt.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
-                .AddField(fb => fb.WithName("**Days Since Created**").WithValue(daysCreation.ToString()).WithIsInline(true))
-                .AddField(fb => fb.WithName("**Current Game**").WithValue($"{(user.Game?.Name == null ? "-" : user.Game.Value.Name)}").WithIsInline(true))
-                .AddField(fb => fb.WithName("**Roles**").WithValue($"**({user.RoleIds.Count})** - {string.Join(", ", user.GetRoles().Select(r => r.Name)).SanitizeMentions()}").WithIsInline(true))
-                .WithThumbnailUrl(avi)
-                .WithOkColor();
-            await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                    var createdA = (DateTimeOffset)user.CreatedAt;
+                    var joinedA = (DateTimeOffset)user.JoinedAt;
+                    DateTime createdAt = createdA.UtcDateTime;
+                    DateTime joinedAt = joinedA.UtcDateTime;
+                    DateTime timeNow = DateTime.UtcNow;
+                    int daysCreation = (int)Math.Abs(Math.Round((createdAt - timeNow).TotalDays));
+                    int daysJoin = (int)Math.Abs(Math.Round((joinedAt - timeNow).TotalDays));
+                    string avi = user.AvatarUrl;
+                    if (user.AvatarId.Substring(0,2) == "a_")
+                        avi = avi.Substring(0, avi.Length-3) + "gif";
+                    var embed = new EmbedBuilder()
+                        .AddField(fb => fb.WithName("**Name**").WithValue($"**{user.Username}**#{user.Discriminator}").WithIsInline(true));
+                    if (!string.IsNullOrWhiteSpace(user.Nickname))
+                    {
+                        embed.AddField(fb => fb.WithName("**Nickname**").WithValue(user.Nickname).WithIsInline(true));
+                    }
+                    embed.AddField(fb => fb.WithName("**ID**").WithValue(user.Id.ToString()).WithIsInline(true))
+                        .AddField(fb => fb.WithName("**Joined Server**").WithValue($"{user.JoinedAt?.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
+                        .AddField(fb => fb.WithName("**Days Since Joined**").WithValue(daysJoin.ToString()).WithIsInline(true))
+                        .AddField(fb => fb.WithName("**Created At**").WithValue($"{user.CreatedAt.ToString("dd.MM.yyyy HH:mm")}").WithIsInline(true))
+                        .AddField(fb => fb.WithName("**Days Since Created**").WithValue(daysCreation.ToString()).WithIsInline(true))
+                        .AddField(fb => fb.WithName("**Current Game**").WithValue($"{(user.Game?.Name == null ? "-" : user.Game.Value.Name)}").WithIsInline(true))
+                        .AddField(fb => fb.WithName("**Roles**").WithValue($"**({user.RoleIds.Count})** - {string.Join(", ", user.GetRoles().Select(r => r.Name)).SanitizeMentions()}").WithIsInline(true))
+                        .WithThumbnailUrl(avi)
+                        .WithOkColor();
+                    await Context.Channel.EmbedAsync(embed).ConfigureAwait(false);
+                }
+                catch { await Context.Channel.SendMessageAsync("Something went wrong, it's not your fault, blame the discord.NET API ¯\\_(ツ)_/¯").ConfigureAwait(false); }
             }
         }
 
